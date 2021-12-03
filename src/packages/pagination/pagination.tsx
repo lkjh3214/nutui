@@ -20,7 +20,6 @@ export interface PaginationProps {
 }
 
 const defaultProps = {
-  // current: NaN,
   defaultValue: 1,
   mode: 'multi',
   prevText: '上一页',
@@ -56,7 +55,6 @@ export const Pagination: FunctionComponent<
   } = props
 
   let _pages: any = []
-  console.log('props', props)
   const [currentPage, setCurrent] = useState(1)
   const [pages, setPages] = useState(_pages)
   const [countRef, setCountRef] = useState(Number(pageCount))
@@ -107,7 +105,7 @@ export const Pagination: FunctionComponent<
   //点击选择page
   const select = (curPage: number, isSelect: boolean) => {
     if (curPage > countRef || curPage < 1) return
-    // 是否传入current
+    // 是否传入modelValue
     if (!('modelValue' in props)) {
       setCurrent(Number(curPage))
       if (curPage != currentPage) {

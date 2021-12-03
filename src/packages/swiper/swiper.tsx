@@ -328,31 +328,31 @@ export const Swiper: FunctionComponent<
     //   }
     //   return style;
     // }
-    if (loop) {
-      return (
-        <div className="adm-swiper-track-inner">
-          {React.Children.map(validChildren, (child, index) => {
-            return (
-              <div
-                className="adm-swiper-slide"
-                style={{
-                  [isVertical ? 'y' : 'x']: position.to((position) => {
-                    let finalPosition = -position + index * 100
-                    const totalWidth = count * 100
-                    const flagWidth = totalWidth / 2
-                    finalPosition = modulus(finalPosition + flagWidth, totalWidth) - flagWidth
-                    return `${finalPosition}%`
-                  }),
-                  left: `-${index * 100}%`,
-                }}
-              >
-                {child}
-              </div>
-            )
-          })}
-        </div>
-      )
-    }
+    // if (loop) {
+    //   return (
+    //     <div className="adm-swiper-track-inner">
+    //       {React.Children.map(validChildren, (child, index) => {
+    //         return (
+    //           <div
+    //             className="adm-swiper-slide"
+    //             style={{
+    //               [isVertical ? 'y' : 'x']: position.to((position) => {
+    //                 let finalPosition = -position + index * 100
+    //                 const totalWidth = count * 100
+    //                 const flagWidth = totalWidth / 2
+    //                 finalPosition = modulus(finalPosition + flagWidth, totalWidth) - flagWidth
+    //                 return `${finalPosition}%`
+    //               }),
+    //               left: `-${index * 100}%`,
+    //             }}
+    //           >
+    //             {child}
+    //           </div>
+    //         )
+    //       })}
+    //     </div>
+    //   )
+    // }
   }
   useEffect(() => {
     console.log('====', children)

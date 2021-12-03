@@ -2,44 +2,56 @@ import React, { useState } from 'react'
 import { Pagination } from './pagination'
 
 const PaginationDemo = () => {
-  const [currentPage, setCurrent] = useState(1)
-  const pageChange = (v: any) => {
-    console.log(v)
+  const [currentPage1, setCurrent1] = useState(1)
+  const [currentPage2, setCurrent2] = useState(1)
+  const [currentPage3, setCurrent3] = useState(1)
+  const [currentPage4, setCurrent4] = useState(1)
+  const pageChange1 = (v: any) => {
     let c = v
-    setCurrent(c)
+    setCurrent1(c)
+  }
+  const pageChange2 = (v: any) => {
+    let c = v
+    setCurrent2(c)
+  }
+  const pageChange3 = (v: any) => {
+    let c = v
+    setCurrent3(c)
+  }
+  const pageChange4 = (v: any) => {
+    let c = v
+    setCurrent4(c)
   }
   const pageNodeRender = (item: any) => {
-    return (
-      <div>
-        {/* 自定义 */}
-        {'第' + item.text + '页'}
-      </div>
-    )
+    return <div>{item.number == 3 ? 'hot' : item.text}</div>
   }
-  // console.log(currentPage)
   return (
     <div className="demo">
       <h2>基础用法</h2>
-      <Pagination modelValue={currentPage} totalItems="25" itemsPerPage="5" onChange={pageChange} />
+      <Pagination
+        modelValue={currentPage1}
+        totalItems="25"
+        itemsPerPage="5"
+        onChange={pageChange1}
+      />
       <h2>简单模式</h2>
-      <Pagination modelValue={currentPage} pageCount={12} mode="simple" onChange={pageChange} />
+      <Pagination modelValue={currentPage2} pageCount={12} mode="simple" onChange={pageChange2} />
       <h2>显示省略号</h2>
       <Pagination
-        modelValue={currentPage}
+        modelValue={currentPage3}
         totalItems="125"
         showPageSize="3"
         forceEllipses
-        onChange={pageChange}
+        onChange={pageChange3}
       />
       <h2>自定义按钮</h2>
       <Pagination
-        // defaultValue={currentPage}
-        // modelValue={currentPage}
+        modelValue={currentPage4}
         totalItems="500"
         showPageSize="5"
-        onChange={pageChange}
-        prevText={'prev'}
-        nextText={'next'}
+        onChange={pageChange4}
+        prevText={'<'}
+        nextText={'>'}
         pageNodeRender={pageNodeRender}
       />
     </div>
