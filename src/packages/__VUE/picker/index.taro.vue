@@ -23,11 +23,14 @@
         <view class="nut-picker__hairline"></view>
         <view class="nut-picker__columnitem" v-for="(column, columnIndex) in columnsList" :key="columnIndex">
           <nut-picker-column
+            :ref="swipeRef"
             :itemShow="show"
             :column="column"
             :readonly="readonly"
             :columnsType="columnsType"
             :value="defaultValues[columnIndex]"
+            :threeDimensional="threeDimensional"
+            :swipeDuration="swipeDuration"
             @change="
               (option) => {
                 changeHandler(columnIndex, option);
@@ -77,6 +80,16 @@ export default create({
     readonly: {
       type: Boolean,
       default: false
+    },
+    // 是否开启3D效果
+    threeDimensional: {
+      type: Boolean,
+      default: true
+    },
+    // 惯性滚动 时长
+    swipeDuration: {
+      type: [Number, String],
+      default: 1000
     }
   },
   emits: ['close', 'change', 'confirm', 'update:visible', 'update:modelValue'],
@@ -88,6 +101,14 @@ export default create({
 
     // 选中项
     let defaultValues = ref<(number | string)[]>(props.modelValue);
+
+    const pickerColumn = ref<any[]>([]);
+
+    const swipeRef = (el: any) => {
+      if (el && pickerColumn.value.length < columnsList.value.length) {
+        pickerColumn.value.push(el);
+      }
+    };
 
     const classes = computed(() => {
       const prefixCls = componentName;
@@ -159,7 +180,10 @@ export default create({
     };
 
     const close = () => {
-      emit('close');
+      emit('close', {
+        selectedValue: defaultValues.value,
+        selectedOptions: selectedOptions.value
+      });
       emit('update:visible', false);
     };
 
@@ -169,10 +193,15 @@ export default create({
           defaultValues.value[columnIndex] = option.value ? option.value : '';
           let index = columnIndex;
           let cursor = option;
-          while (cursor && cursor.children) {
+          while (cursor && cursor.children && cursor.children[0]) {
             defaultValues.value[index + 1] = cursor.children[0].value;
             index++;
             cursor = cursor.children[0];
+          }
+
+          // 当前改变列 的 下一列 children 值为空
+          if (cursor && cursor.children && cursor.children.length == 0) {
+            defaultValues.value = defaultValues.value.slice(0, index + 1);
           }
         } else {
           defaultValues.value[columnIndex] = option.hasOwnProperty('value') ? option.value : '';
@@ -187,6 +216,18 @@ export default create({
     };
 
     const confirmHandler = () => {
+      pickerColumn.value.length > 0 &&
+        pickerColumn.value.forEach((column) => {
+          column.stopMomentum();
+        });
+
+      if (defaultValues.value && !defaultValues.value.length) {
+        columnsList.value.forEach((columns) => {
+          defaultValues.value.push(columns[0].value);
+          selectedOptions.value.push(columns[0]);
+        });
+      }
+
       emit('confirm', {
         selectedValue: defaultValues.value,
         selectedOptions: selectedOptions.value
@@ -195,7 +236,6 @@ export default create({
     };
 
     onMounted(() => {
-      console.log('更新');
       if (props.visible) state.show = props.visible;
     });
 
@@ -229,6 +269,8 @@ export default create({
       () => props.visible,
       (val) => {
         state.show = val;
+        console.log(defaultValues.value);
+        if (val) pickerColumn.value = [];
       }
     );
 
@@ -249,7 +291,9 @@ export default create({
       changeHandler,
       confirmHandler,
       defaultValues,
-      translate
+      translate,
+      pickerColumn,
+      swipeRef
     };
   }
 });

@@ -10,6 +10,7 @@
         }
       "
     ></nut-cell>
+
     <nut-picker
       v-model:visible="show"
       :columns="columns"
@@ -34,6 +35,25 @@
       :columns="columns"
       title="城市选择"
       @confirm="(options) => confirm('defult', options)"
+    >
+    </nut-picker>
+
+    <h2>平铺展示</h2>
+    <nut-cell
+      title="请选择城市"
+      :desc="title"
+      @click="
+        () => {
+          showTitle = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model:visible="showTitle"
+      :columns="columns"
+      title="城市选择"
+      :three-dimensional="false"
+      @confirm="(options) => confirm('title', options)"
     >
     </nut-picker>
 
@@ -108,6 +128,24 @@
     >
       <nut-button block type="primary" @click="alwaysFun">永远有效</nut-button></nut-picker
     >
+
+    <h2>异步获取</h2>
+    <nut-cell
+      title="异步获取"
+      :desc="effect"
+      @click="
+        () => {
+          showPort = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model:visible="showPort"
+      :columns="portColumns"
+      title="异步获取"
+      @confirm="(options) => confirm('effect', options)"
+      @change="portChange"
+    ></nut-picker>
   </div>
 </template>
 <script lang="ts">
@@ -118,6 +156,7 @@ export default {
   setup() {
     const selectedValue = ref(['ZheJiang']);
     const asyncValue = ref<string[]>([]);
+    const columsNum = ref([]);
     const columns = ref([
       { text: '南京市', value: 'NanJing' },
       { text: '无锡市', value: 'WuXi' },
@@ -204,6 +243,19 @@ export default {
       { text: '2022-11', value: 'November' },
       { text: '2022-12', value: 'December' }
     ]);
+
+    const portColumns = ref([
+      {
+        text: '浙江',
+        value: 'ZheJiang',
+        children: []
+      },
+      {
+        text: '福建',
+        value: 'FuJian',
+        children: []
+      }
+    ]);
     const asyncColumns = ref<PickerOption[]>([]);
 
     const show = ref(false);
@@ -212,6 +264,8 @@ export default {
     const showCascader = ref(false);
     const showAsync = ref(false);
     const showEffect = ref(false);
+    const showPort = ref(false);
+    const showTitle = ref(false);
 
     const desc = reactive({
       index: '',
@@ -219,7 +273,8 @@ export default {
       multiple: '',
       cascader: '',
       async: '',
-      effect: ''
+      effect: '',
+      title: ''
     });
 
     const open = (index: number) => {
@@ -245,6 +300,10 @@ export default {
     };
 
     onMounted(() => {
+      for (let i = 1; i < 60; i++) {
+        columsNum.value.push({ text: i, value: i });
+      }
+
       setTimeout(() => {
         asyncColumns.value = [
           { text: '南京市', value: 'NanJing' },
@@ -265,6 +324,35 @@ export default {
     };
     const change = ({ selectedValue }: { selectedValue: string[] }) => {
       console.log(selectedValue);
+    };
+
+    const portChange = (chooseDate: any) => {
+      const { columnIndex, selectedOptions, selectedValue } = chooseDate;
+      console.log(chooseDate);
+      if (columnIndex == 0) {
+        //  if(portColumns.value[0].children.length == 0){
+
+        //  }
+        console.log('选择后更新');
+        portColumns.value[0].children = ([] as any).concat([
+          {
+            text: '杭州',
+            value: 'HangZhou',
+            children: [
+              { text: '西湖区', value: 'XiHu' },
+              { text: '余杭区', value: 'YuHang' }
+            ]
+          },
+          {
+            text: '温州',
+            value: 'WenZhou',
+            children: [
+              { text: '鹿城区', value: 'LuCheng' },
+              { text: '瓯海区', value: 'OuHai' }
+            ]
+          }
+        ]);
+      }
     };
 
     const alwaysFun = () => {
@@ -289,7 +377,12 @@ export default {
       asyncColumns,
       effectColumns,
       showEffect,
-      alwaysFun
+      alwaysFun,
+      columsNum,
+      showPort,
+      showTitle,
+      portColumns,
+      portChange
     };
   }
 };
