@@ -3,7 +3,7 @@ import DialogTemplate from '../index.vue';
 import Icon from '../../icon/index.vue';
 import Popup from '../../popup/index.vue';
 import Button from '../../button/index.vue';
-import OverLay from '../../overLay/index.vue';
+import OverLay from '../../overlay/index.vue';
 
 beforeAll(() => {
   config.global.components = {
@@ -36,6 +36,17 @@ test('should render dialog template', async () => {
 
   const overLay = wrapper.getComponent(OverLay);
   expect(await overLay.find('.nut-dialog__content'));
+});
+
+test('header slot', async () => {
+  const wrapper = mount(DialogTemplate, {
+    slots: {
+      header: 'test-title'
+    }
+  });
+
+  const overLay = wrapper.getComponent(OverLay);
+  expect(await overLay.find('.nut-dialog__header'));
 });
 
 // test('should render dialog methods', async () => {

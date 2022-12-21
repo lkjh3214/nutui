@@ -12,8 +12,8 @@
 
 <script lang="ts">
 import { onMounted, onDeactivated, onActivated, reactive, ref, computed } from 'vue';
-import { createComponent } from '../../utils/create';
-import requestAniFrame from '../../utils/raf';
+import { createComponent } from '@/packages/utils/create';
+import requestAniFrame from '@/packages/utils/raf';
 const { componentName, create } = createComponent('drag');
 export default create({
   props: {
@@ -37,7 +37,7 @@ export default create({
       }
     }
   },
-  setup(props, { emit }) {
+  setup(props) {
     const myDrag = ref();
     const state = reactive({
       keepAlive: false,
@@ -185,9 +185,9 @@ export default create({
     });
     onDeactivated(() => {
       state.keepAlive = true;
-      (myDrag as any).removeEventListener('touchstart', touchStart);
-      (myDrag as any).removeEventListener('touchmove', touchMove);
-      (myDrag as any).removeEventListener('touchend', touchEnd);
+      myDrag.value.removeEventListener('touchstart', touchStart);
+      myDrag.value.removeEventListener('touchmove', touchMove);
+      myDrag.value.removeEventListener('touchend', touchEnd);
     });
     return {
       classes,

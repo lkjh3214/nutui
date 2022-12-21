@@ -1,6 +1,27 @@
+.nut-theme-dark {
+  .nut-input {
+    background: $dark-background;
+    &-label {
+      color: $dark-color;
+    }
+    .input-text,
+    &__text--readonly {
+      color: $dark-color;
+    }
+  }
+}
 input,
 textarea {
   font: inherit;
+  .nut-placeholder {
+    // font: inherit;
+  }
+}
+textarea {
+  .nut-placeholder {
+    // padding: 0 2px;
+    // font: inherit;
+  }
 }
 .nut-input {
   position: relative;
@@ -20,7 +41,7 @@ textarea {
 
   .input-text,
   &__text--readonly {
-    width: 100%;
+    width: 90%;
     padding: 0;
     // padding-right: 35px;
     line-height: inherit;
@@ -28,6 +49,7 @@ textarea {
     outline: 0 none;
     border: 0;
     text-decoration: none;
+    background: transparent;
     resize: none;
   }
 
@@ -47,20 +69,33 @@ textarea {
     vertical-align: middle;
   }
   &-inner {
+    position: relative;
     display: flex;
     align-items: center;
+  }
+  &-box {
+    position: relative;
+    width: 100%;
+  }
+  &-disabled-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 2;
   }
   &-error-message {
     color: $input-required-color;
     font-size: 12px;
   }
   &-word-limit {
-    display: block;
+    display: flex;
+    justify-content: flex-end;
     margin-top: 4px;
     color: #808080;
     font-size: 12px;
     // line-height: var(--van-field-word-limit-line-height);
-    text-align: right;
   }
   &-left-icon,
   &-right-icon {
@@ -74,6 +109,12 @@ textarea {
   }
   &-left-icon {
     margin-right: 4px;
+  }
+  &-clear-box {
+    height: 100%;
+    .nut-input-clear {
+      vertical-align: -2px;
+    }
   }
   &-clear {
     width: 16px;

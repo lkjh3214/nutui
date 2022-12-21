@@ -1,3 +1,10 @@
+.nut-theme-dark {
+  .nut-tabbar-item {
+    &__icon--unactive {
+      color: $dark-color-gray;
+    }
+  }
+}
 .nut-tabbar-item {
   flex: 1;
   text-align: center;
@@ -32,6 +39,21 @@
       color: $white;
       z-index: 1;
     }
+    &_dot {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 7px;
+      padding: 0px;
+      background: $tabbar-active-color;
+      text-align: center;
+      font-size: 12px;
+      font-weight: normal;
+      color: #fff;
+      top: 0;
+      right: 0;
+      transform: translate(50%, -50%);
+    }
 
     &_num {
       line-height: 1;
@@ -50,10 +72,15 @@
       display: block;
       background-size: 100% 100%;
       background-position: center center;
+      img {
+        width: 20px;
+        height: 20px;
+      }
     }
     &_nav-word {
       font-size: $tabbar-item-text-font-size;
       line-height: $tabbar-item-text-line-height;
+      margin-top: $tabbar-word-margin-top;
       display: block;
     }
     &_big-word {

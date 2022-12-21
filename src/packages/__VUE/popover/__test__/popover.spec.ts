@@ -1,11 +1,15 @@
-import { mount, config } from '@vue/test-utils';
+import { config, mount } from '@vue/test-utils';
 import Popover from '../index.vue';
-
+import NutPupup from '../../popup/index.vue';
+import NutOverlay from '../../overlay/index.vue';
 import NutIcon from '../../icon/index.vue';
+import { nextTick, reactive } from 'vue';
 
 beforeAll(() => {
   config.global.components = {
-    NutIcon
+    NutIcon,
+    NutPupup,
+    NutOverlay
   };
 });
 
@@ -13,82 +17,81 @@ afterAll(() => {
   config.global.components = {};
 });
 
-const baseActions = [
-  {
-    name: '选项一',
-    icon: 'my2'
-  },
-  {
-    name: '选项二',
-    icon: 'cart2'
-  },
-  {
-    name: '选项三',
-    icon: 'location2'
-  }
-];
+const iconItemList = [{ name: 'option1' }, { name: 'option2' }, { name: 'option3' }];
 
-test('should emit click event when clicking the list', async () => {
+const listDisabled = reactive([
+  { name: 'option1', disabled: true },
+  { name: 'option2', disabled: true },
+  { name: 'option3' }
+]);
+
+test('first render', async () => {
   const wrapper = mount(Popover, {
     props: {
       visible: true,
-      list: baseActions
+      list: iconItemList,
+      teleportDisable: false
     }
   });
-  await wrapper.find('.title-item').trigger('click');
-  expect(wrapper.emitted('choose')![0]).toEqual([baseActions[0], 0]);
+  await nextTick();
+  expect(wrapper.find('.nut-popover-menu-item').exists()).toBeTruthy();
 });
 
-test('should not emit click event when the list is disabled', () => {
+test('Props theme dark', async () => {
   const wrapper = mount(Popover, {
     props: {
       visible: true,
-      list: [
-        {
-          name: '选项一',
-          disabled: true
-        }
-      ]
+      list: iconItemList,
+      teleportDisable: false,
+      theme: 'dark'
     }
   });
+  await nextTick();
+  expect(wrapper.find('.nut-popover--dark').exists()).toBeTruthy();
+});
 
-  wrapper.find('.title-item').trigger('click');
+test('should not emit select event when the action is disabled', async () => {
+  const wrapper = mount(Popover, {
+    props: {
+      visible: true,
+      list: listDisabled,
+      teleportDisable: false
+    }
+  });
+  await nextTick();
+  expect(wrapper.findAll('.nut-popover-menu-disabled').length).toEqual(2);
+
+  wrapper.find('.nut-popover-menu-item').trigger('click');
   expect(wrapper.emitted('choose')).toBeFalsy();
 });
 
-test('should close popover when clicking the list', async () => {
+test('should close popover when clicking the action', async () => {
   const wrapper = mount(Popover, {
     props: {
       visible: true,
-      actions: baseActions
+      list: iconItemList,
+      teleportDisable: false
     }
   });
+  await nextTick();
 
-  await wrapper.find('.more-background').trigger('click');
+  await wrapper.find('.nut-popover-menu-item').trigger('click');
   expect(wrapper.emitted('update:visible')![0]).toEqual([false]);
+
+  await wrapper.setProps({ closeOnClickAction: false });
+  await wrapper.find('.nut-popover-menu-item').trigger('click');
+  expect(wrapper.emitted('update:visible')).toHaveLength(1);
 });
 
-test('should watch placement prop and update location', async () => {
-  const root = document.createElement('div');
+test('Set Props Position', async () => {
   const wrapper = mount(Popover, {
     props: {
-      visible: true
+      visible: true,
+      list: iconItemList,
+      teleportDisable: false,
+      location: 'top-start'
     }
   });
-
-  await wrapper.setProps({
-    location: 'right'
-  });
-
-  expect(root.innerHTML).toMatchSnapshot();
-});
-
-test('should change icon class prefix when using icon prop', () => {
-  const wrapper = mount(Popover, {
-    props: {
-      list: [{ icon: 'success', name: 'foo' }]
-    }
-  });
-
-  expect(wrapper.html()).toMatchSnapshot();
+  await nextTick();
+  expect(wrapper.find('.nut-popover-arrow--top-start').exists()).toBeTruthy();
 });

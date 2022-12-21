@@ -69,6 +69,7 @@ export default{
       type="rightColumn"
       v-model:visible="visible"
       :custom-key="customKey"
+      confirm-text="支付"
       @input="input"
       @close="close"
     >
@@ -191,6 +192,48 @@ export default{
 </script>
 ```
 :::
+### 身份证键盘
+
+:::demo
+```html
+<template>
+     <nut-cell :isLink="true" @click="showKeyBoard(4)" :showIcon="true" title="身份证键盘"></nut-cell>
+    <nut-numberkeyboard
+      v-model:visible="visible"
+      :custom-key="customKey"
+      @input="input"
+      @close="close"
+    >
+    </nut-numberkeyboard>
+</template>
+<script>
+import { ref,reactive } from 'vue';
+import { Toast } from '@nutui/nutui';
+export default{
+  setup() {
+    const visible = ref(false);
+    const customKey = reactive(['X']);
+    function showKeyBoard() {
+      visible.value = true;
+    }
+    function input(number) {
+      Toast.text(`输入：${number}`);
+    }
+    function close() {
+      visible.value = false;
+    }
+    return {
+      visible,
+      customKey,
+      input,
+      showKeyBoard,
+      close,
+    };
+  }
+  }
+</script>
+```
+:::
 
 ### 双向绑定：
 
@@ -239,8 +282,8 @@ export default{
 ```
 :::
 
-
-### Prop
+## API
+### Props
 
 | 字段 | 说明 | 类型 | 默认值 |
 |----- | ----- | ----- | ----- |
@@ -248,13 +291,16 @@ export default{
 | title | 键盘标题 | String | - |
 | type | 键盘模式  | String | `default`：默认样式<br>`rightColumn`：带右侧栏 |
 | random-keys | 随机数  | Boolean | false |
-| custom-key | 自定义键盘额外的键  | array<br>string | 数组形式最多支持添加2个,超出默认取前2项 |
+| custom-key | 自定义键盘额外的键  | String [] | 数组形式最多支持添加2个,超出默认取前2项 |
 | overlay | 是否显示遮罩  | Boolean| true |
 | v-model:value | 当前输入值		 | String | - |
-| maxlength  | 输入值最大长度，结合 v-model 使用 | number <br> String| 6 |
+| maxlength  | 输入值最大长度，结合 v-model 使用 | Number ｜ String| 6 |
+| confirm-text  | 自定义完成按钮文字，如"支付"，"下一步"，"提交"等 | String | 完成 |
+| teleport    | 指定挂载节点(`小程序不支持`)   | String         | `"body"`      |
+| pop-class    | 自定义弹框类名     | String         | -             |
 
 
-### Event
+### Events
 
 | 字段 | 说明 | 回调参数
 |----- | ----- | -----

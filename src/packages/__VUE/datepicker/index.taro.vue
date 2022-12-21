@@ -1,25 +1,43 @@
 <template>
   <nut-picker
+    v-model="selectedValue"
     :visible="show"
+    :okText="okText"
+    :cancelText="cancelText"
     @close="closeHandler"
-    :list-data="columns"
+    :columns="columns"
     @change="changeHandler"
     :title="title"
     @confirm="confirm"
-  ></nut-picker>
+    :teleportDisable="teleportDisable"
+    :threeDimensional="threeDimensional"
+    :swipeDuration="swipeDuration"
+    :safeAreaInsetBottom="safeAreaInsetBottom"
+    :destroyOnClose="destroyOnClose"
+  >
+    <template #top>
+      <slot name="top"></slot>
+    </template>
+    <slot></slot>
+  </nut-picker>
 </template>
 <script lang="ts">
-import { toRefs, watch, computed, reactive, onMounted } from 'vue';
-
+import { toRefs, watch, computed, reactive, onBeforeMount } from 'vue';
+import type { PropType } from 'vue';
 import nutPicker from '../picker/index.taro.vue';
-import { createComponent } from '../../utils/create';
+import { popupProps } from '../popup/props';
+import { createComponent } from '@/packages/utils/create';
+import { padZero, isDate as isDateU } from '@/packages/utils/util';
 const { componentName, create } = createComponent('datepicker');
+
 const currentYear = new Date().getFullYear();
 function isDate(val: Date): val is Date {
-  return Object.prototype.toString.call(val) === '[object Date]' && !isNaN(val.getTime());
+  return isDateU(val) && !isNaN(val.getTime());
 }
 
-const zhCNType = {
+const zhCNType: {
+  [props: string]: string;
+} = {
   day: '日',
   year: '年',
   month: '月',
@@ -32,12 +50,17 @@ export default create({
     nutPicker
   },
   props: {
+    ...popupProps,
     modelValue: null,
-    visible: {
-      type: Boolean,
-      default: false
-    },
     title: {
+      type: String,
+      default: ''
+    },
+    okText: {
+      type: String,
+      default: ''
+    },
+    cancelText: {
       type: String,
       default: ''
     },
@@ -47,7 +70,7 @@ export default create({
     },
     isShowChinese: {
       type: Boolean,
-      default: true
+      default: false
     },
     minuteStep: {
       type: Number,
@@ -62,15 +85,31 @@ export default create({
       type: Date,
       default: () => new Date(currentYear + 10, 11, 31),
       validator: isDate
-    }
+    },
+    formatter: {
+      type: Function as PropType<import('./type').Formatter>,
+      default: null
+    },
+    // 是否开启3D效果
+    threeDimensional: {
+      type: Boolean,
+      default: true
+    },
+    // 惯性滚动 时长
+    swipeDuration: {
+      type: [Number, String],
+      default: 1000
+    },
+    filter: Function as PropType<import('./type').Filter>
   },
-  emits: ['click', 'update:visible', 'confirm'],
+  emits: ['click', 'update:visible', 'change', 'confirm', 'update:moduleValue'],
 
   setup(props, { emit }) {
     const state = reactive({
-      show: false,
+      show: props.visible,
       currentDate: new Date(),
-      title: props.title
+      title: props.title,
+      selectedValue: []
     });
     const formatValue = (value: Date) => {
       if (!isDate(value)) {
@@ -112,7 +151,6 @@ export default create({
           }
         }
       }
-
       return {
         [`${type}Year`]: year,
         [`${type}Month`]: month,
@@ -165,6 +203,9 @@ export default create({
         case 'time':
           result = result.slice(3, 6);
           break;
+        case 'year-month':
+          result = result.slice(0, 2);
+          break;
         case 'month-day':
           result = result.slice(1, 3);
           break;
@@ -175,49 +216,71 @@ export default create({
       return result;
     });
 
-    const changeHandler = (val: string[]) => {
-      if (['date', 'datetime'].includes(props.type)) {
-        let formatDate = [];
-        if (props.isShowChinese) {
-          formatDate = val.map((res: string) => {
-            return Number(res.slice(0, res.length - 1));
-          }) as any;
-        } else {
-          formatDate = val;
+    const columns = computed(() => {
+      const val = ranges.value.map((res, columnIndex) => {
+        return generateValue(res.range[0], res.range[1], getDateIndex(res.type), res.type, columnIndex);
+      });
+      return val;
+    });
+
+    const changeHandler = ({
+      columnIndex,
+      selectedValue,
+      selectedOptions
+    }: {
+      columnIndex: number;
+      selectedValue: (string | number)[];
+      selectedOptions: import('../picker/types').PickerOption[];
+    }) => {
+      if (['date', 'datetime', 'datehour', 'month-day', 'year-month'].includes(props.type)) {
+        let formatDate: (number | string)[] = [];
+        selectedValue.forEach((item) => {
+          formatDate.push(item);
+        });
+        if (props.type == 'month-day') {
+          formatDate.unshift(new Date(props.modelValue || props.minDate || props.maxDate).getFullYear());
         }
-        let date: Date;
-        if (props.type === 'date') {
-          state.currentDate = formatValue(
-            new Date(
-              formatDate[0],
-              formatDate[1] - 1,
-              Math.min(formatDate[2], getMonthEndDay(formatDate[0], formatDate[1]))
-            )
-          );
+        if (props.type == 'year-month' && formatDate.length < 3) {
+          formatDate.push(new Date(props.modelValue || props.minDate || props.maxDate).getDate());
+        }
+
+        const year = Number(formatDate[0]);
+        const month = Number(formatDate[1]) - 1;
+        const day = Math.min(Number(formatDate[2]), getMonthEndDay(Number(formatDate[0]), Number(formatDate[1])));
+        let date: Date | null = null;
+
+        if (props.type === 'date' || props.type === 'month-day' || props.type === 'year-month') {
+          date = new Date(year, month, day);
         } else if (props.type === 'datetime') {
-          state.currentDate = formatValue(
-            new Date(
-              formatDate[0],
-              formatDate[1] - 1,
-              Math.min(formatDate[2], getMonthEndDay(formatDate[0], formatDate[1])),
-              formatDate[3],
-              formatDate[4]
-            )
-          );
+          date = new Date(year, month, day, Number(formatDate[3]), Number(formatDate[4]));
+        } else if (props.type === 'datehour') {
+          date = new Date(year, month, day, Number(formatDate[3]));
         }
+        state.currentDate = formatValue(date as Date);
       }
+      emit('change', { columnIndex, selectedValue, selectedOptions });
     };
 
-    const generateValue = (min: number, max: number, val: number, type: string) => {
+    const formatterOption = (type: string, value: string | number) => {
+      const { formatter, isShowChinese } = props;
+      let fOption = null;
+      if (formatter) {
+        fOption = formatter(type, { text: padZero(value, 2), value: padZero(value, 2) });
+      } else {
+        const padMin = padZero(value, 2);
+        const fatter = isShowChinese ? zhCNType[type] : '';
+        fOption = { text: padMin + fatter, value: padMin };
+      }
+
+      return fOption;
+    };
+
+    const generateValue = (min: number, max: number, val: number | string, type: string, columnIndex: number) => {
       // if (!(max > min)) return;
-      const arr: Array<number | string> = [];
+      const arr: Array<import('../picker/types').PickerOption> = [];
       let index = 0;
       while (min <= max) {
-        if (props.isShowChinese) {
-          arr.push(min + zhCNType[type]);
-        } else {
-          arr.push(min);
-        }
+        arr.push(formatterOption(type, min));
 
         if (type === 'minute') {
           min += props.minuteStep;
@@ -230,7 +293,8 @@ export default create({
         }
       }
 
-      return { values: arr, defaultIndex: index };
+      (state.selectedValue as any)[columnIndex] = arr[index].value;
+      return props.filter ? props.filter(type, arr) : arr;
     };
 
     const getDateIndex = (type: string) => {
@@ -250,17 +314,6 @@ export default create({
       return 0;
     };
 
-    const columns = computed(() => {
-      // console.log(ranges.value);
-      const val = ranges.value.map((res) => {
-        return generateValue(res.range[0], res.range[1], getDateIndex(res.type), res.type);
-      });
-      return val;
-    });
-    const handleClick = (event: Event) => {
-      emit('click', event);
-    };
-
     const closeHandler = () => {
       emit('update:visible', false);
     };
@@ -270,7 +323,8 @@ export default create({
       emit('confirm', val);
     };
 
-    onMounted(() => {
+    onBeforeMount(() => {
+      console.log('平铺展示');
       state.currentDate = formatValue(props.modelValue);
     });
 

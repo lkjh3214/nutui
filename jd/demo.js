@@ -7,7 +7,7 @@ var demoModel = function (nameLc) {
 </template>
 <script lang="ts">
 import { reactive, toRefs, computed } from 'vue';
-import { createComponent } from '../../utils/create';
+import { createComponent } from '@/packages/utils/create';
 const { componentName, create } = createComponent('${nameLc}');
 export default create({
   props: {
@@ -41,19 +41,29 @@ export default create({
 `,
     demo: `<template>
   <div class="demo">
-    <h2>基础用法</h2>
+    <h2>{{ translate('basic') }}</h2>
     <nut-cell>
       <nut-${nameLc}></nut-${nameLc}>
     </nut-cell>
   </div>
 </template>
 <script lang="ts">
-import { createComponent } from '../../utils/create';
-const { createDemo } = createComponent('${nameLc}');
+import { createComponent } from '@/packages/utils/create';
+const { createDemo, translate } = createComponent('${nameLc}');
+import { useTranslate } from '@/sites/assets/util/useTranslate';
+const initTranslate = () => useTranslate({
+  'zh-CN': {
+    basic: '基本用法'
+  },
+  'en-US': {
+    basic: 'Basic Usage'
+  }
+})
 export default createDemo({
   props: {},
   setup() {
-    return {};
+    initTranslate();
+    return { translate };
   }
 });
 </script>
@@ -133,6 +143,58 @@ app.use();
 | 事件名 | 说明           | 回调参数     |
 |--------|----------------|--------------|
 | click  | 点击图标时触发 | event: Event |
+`,
+    docEN: `# ${nameLc} 
+
+### Intro
+
+### Install
+
+\`\`\`javascript
+
+import { createApp } from 'vue';
+// vue
+import {  } from '@nutui/nutui';
+// taro
+import {  } from '@nutui/nutui-taro';
+
+const app = createApp();
+app.use();
+
+\`\`\`
+
+### Basic Usage
+
+:::demo
+
+\`\`\`html
+<template>
+  
+</template>
+<script lang="ts">
+  export default {
+    setup() {
+      return {  };
+    }
+  };
+</script>
+\`\`\`
+
+:::
+
+## API
+
+### Props
+
+| Attribute         | Description                             | Type   | Default           |
+|--------------|----------------------------------|--------|------------------|
+| name         | description               | String | -                |
+
+### Events
+
+| Event | Description           | Arguments     |
+|--------|----------------|--------------|
+| click  | description | event: Event |
 `
   };
 

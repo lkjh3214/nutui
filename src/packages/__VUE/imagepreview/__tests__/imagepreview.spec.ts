@@ -1,6 +1,27 @@
-import { mount } from '@vue/test-utils';
+import { mount, config } from '@vue/test-utils';
 import ImagePreview from '../index.vue';
-import { nextTick } from 'vue';
+import { nextTick, reactive, toRefs } from 'vue';
+import NutOverlay from '../../overlay/index.vue';
+import NutIcon from '../../icon/index.vue';
+import NutPopup from '../../popup/index.vue';
+import NutSwiper from '../../swiper/index.vue';
+import NutSwiperItem from '../../swiperitem/index.vue';
+import NutVideo from '../../video/index.vue';
+
+beforeAll(() => {
+  config.global.components = {
+    NutOverlay,
+    NutIcon,
+    NutPopup,
+    NutSwiper,
+    NutSwiperItem,
+    NutVideo
+  };
+});
+
+afterAll(() => {
+  config.global.components = {};
+});
 
 const images = [
   {
@@ -24,18 +45,9 @@ const videos = [
       type: 'video/mp4'
     },
     options: {
-      muted: true,
-      controls: true
-    }
-  },
-  {
-    source: {
-      src: 'https://storage.jd.com/about/big-final.mp4?Expires=3730193075&AccessKey=3LoYX1dQWa6ZXzQl&Signature=ViMFjz%2BOkBxS%2FY1rjtUVqbopbJI%3D',
-      type: 'video/mp4'
-    },
-    options: {
-      muted: true,
-      controls: true
+      autoplay: false,
+      muted: false,
+      controls: false
     }
   }
 ];
@@ -48,7 +60,25 @@ test('basic usage test', async () => {
     }
   });
   await nextTick();
-  expect(wrapper.find('.custom-pop').html()).toMatchSnapshot();
+  expect((wrapper.find('.nut-imagepreview-custom-pop').element as any).style.display).toEqual('');
+});
+
+test('test autoplay', async () => {
+  const wrapper = mount(ImagePreview, {
+    props: {
+      show: true,
+      images,
+      autoplay: 3000
+    }
+  });
+
+  await nextTick();
+
+  expect(wrapper.vm.active).toBe(0);
+
+  setTimeout(() => {
+    expect(wrapper.vm.active).toBe(1);
+  }, 3000);
 });
 
 test('init page No.', async () => {
@@ -60,7 +90,7 @@ test('init page No.', async () => {
     }
   });
   await nextTick();
-  expect(wrapper.find('.nut-imagepreview-index').html()).toMatchSnapshot();
+  expect(wrapper.find('.nut-imagepreview-index').text()).toEqual('4 / 4');
 });
 
 test('customize pagination and color', async () => {
@@ -78,28 +108,23 @@ test('customize pagination and color', async () => {
   expect(swiperPagination.findAll('i')[0].element.style.backgroundColor).toEqual('red');
 });
 
-test('video surported in H5 env', async () => {
+function sleep(delay = 0): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+}
+
+test('dynamic images', async () => {
   const wrapper = mount(ImagePreview, {
     props: {
       show: true,
-      images,
-      videos
+      images: []
     }
   });
   await nextTick();
-  expect(wrapper.find('.custom-pop').html()).toMatchSnapshot();
+  wrapper.setProps({
+    images
+  });
+  await sleep(1);
+  expect((wrapper.find('.nut-swiper-inner').element as any).style.transform).toEqual('translateX(0px)');
 });
-
-// test('close event trigged', async () => {
-//   const wrapper = mount(ImagePreview, {
-//     props: {
-//       show: true,
-//       images,
-//     }
-//   });
-//   await nextTick();
-//   const overlay: any = wrapper.find('.nut-overlay');
-//   await overlay.trigger('click');
-//   expect(wrapper.emitted('close')).toBeTruthy();
-//   expect(wrapper.emitted('update:show')).toBeFalsy();
-// });

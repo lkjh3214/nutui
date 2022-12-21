@@ -16,12 +16,13 @@ import { Card ,Tag,Price} from '@nutui/nutui-taro';
 
 const app = createApp();
 app.use(Card);
+app.use(Tag);
+app.use(Price);
 
 ```
 
-### 代码实例
 
-### 基本用法
+### 基础用法
 
 :::demo
 ```html
@@ -144,7 +145,8 @@ app.use(Card);
 
 ```
 :::
-### Prop  
+## API
+### Props
 
 | 字段    | 说明                                       | 类型    | 默认值    |
 |---------|--------------------------------------------|---------|-----------|
@@ -155,13 +157,20 @@ app.use(Card);
 | shop-desc  | 店铺介绍                                  | String | -    |
 | delivery     | 配送方式 | String  | -      |
 | shop-name   | 店铺名称| String  | -      |
+| is-need-price  | 是否需要价格展示| Boolean  | true   |
 
+### Events
+
+| 事件名称 | 说明     | 回调参数 |
+|----------|----------|----------|
+| click    | 点击事件 | event: MouseEvent    |
 
 ### Slots
 
 | 名称    | 说明         |
 |---------|--------------|
 | prolist | 	自定义商品介绍 |
+| price | 	价格自定义内容 |
 | origin | 	价格后方自定义内容 |
 | shop-tag | 	店铺介绍自定义 |
 | footer | 	右下角内容自定义 |

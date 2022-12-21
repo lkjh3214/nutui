@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { computed, onMounted, onUnmounted, onActivated, onDeactivated, reactive } from 'vue';
-import { createComponent } from '../../utils/create';
+import { createComponent } from '@/packages/utils/create';
 const { componentName, create } = createComponent('backtop');
 export default create({
   props: {
@@ -21,7 +21,7 @@ export default create({
       default: 10
     },
     elId: {
-      type: [String, Element],
+      type: [String],
       default: 'body'
     },
 

@@ -1,18 +1,18 @@
 <template>
   <div :class="classes">
     <div class="nut-signature-inner" ref="wrap">
-      <canvas ref="canvas" :height="canvasHeight" :width="canvasWidth" v-if="() => isCanvasSupported()"></canvas>
-      <p class="nut-signature-unsopport" v-else>{{ unSupportTpl }}</p>
+      <canvas ref="canvas" :height="canvasHeight" :width="canvasWidth" v-show="isCanvasSupported()"></canvas>
+      <p class="nut-signature-unsopport" v-if="!isCanvasSupported()">{{ unSupportTpl || translate('unSupportTpl') }}</p>
     </div>
 
-    <nut-button class="nut-signature-btn" type="default" @click="clear()">重签</nut-button>
-    <nut-button class="nut-signature-btn" type="primary" @click="confirm()">确认</nut-button>
+    <nut-button class="nut-signature-btn" type="default" @click="clear()">{{ translate('reSign') }}</nut-button>
+    <nut-button class="nut-signature-btn" type="primary" @click="confirm()">{{ translate('confirm') }}</nut-button>
   </div>
 </template>
 <script lang="ts">
 import { ref, reactive, onMounted, computed, toRefs } from 'vue';
-import { createComponent } from '../../utils/create';
-const { componentName, create } = createComponent('signature');
+import { createComponent } from '@/packages/utils/create';
+const { componentName, create, translate } = createComponent('signature');
 
 export default create({
   props: {
@@ -26,7 +26,15 @@ export default create({
     },
     strokeStyle: {
       type: String,
-      default: '#000'
+      default: () => {
+        let bodyDom: any = document.getElementsByTagName('body');
+        let clsName = bodyDom[0]['className'];
+        if (clsName.indexOf('nut-theme-dark') == -1) {
+          return '#000';
+        } else {
+          return '#fff';
+        }
+      }
     },
     type: {
       type: String,
@@ -34,11 +42,11 @@ export default create({
     },
     unSupportTpl: {
       type: String,
-      default: '对不起，当前浏览器不支持Canvas，无法使用本控件！'
+      default: ''
     }
   },
   components: {},
-  emits: ['confirm', 'clear'],
+  emits: ['start', 'end', 'signing', 'confirm', 'clear'],
 
   setup(props, { emit }) {
     const canvas: any = ref<HTMLElement | null>(null);
@@ -73,16 +81,17 @@ export default create({
       state.ctx.beginPath();
       state.ctx.lineWidth = props.lineWidth;
       state.ctx.strokeStyle = props.strokeStyle;
-
+      emit('start');
       canvas.value.addEventListener(state.events[1], moveEventHandler, false);
       canvas.value.addEventListener(state.events[2], endEventHandler, false);
       canvas.value.addEventListener(state.events[3], leaveEventHandler, false);
     };
 
-    const moveEventHandler = (event) => {
+    const moveEventHandler = (event: { preventDefault: () => void; touches: any[] }) => {
       event.preventDefault();
 
       let evt = state.isSupportTouch ? event.touches[0] : event;
+      emit('signing', evt);
       let coverPos = canvas.value.getBoundingClientRect();
       let mouseX = evt.clientX - coverPos.left;
       let mouseY = evt.clientY - coverPos.top;
@@ -91,13 +100,13 @@ export default create({
       state.ctx.stroke();
     };
 
-    const endEventHandler = (event) => {
+    const endEventHandler = (event: { preventDefault: () => void }) => {
       event.preventDefault();
-
+      emit('end');
       canvas.value.removeEventListener(state.events[1], moveEventHandler, false);
       canvas.value.removeEventListener(state.events[2], endEventHandler, false);
     };
-    const leaveEventHandler = (event) => {
+    const leaveEventHandler = (event: { preventDefault: () => void }) => {
       event.preventDefault();
       canvas.value.removeEventListener(state.events[1], moveEventHandler, false);
       canvas.value.removeEventListener(state.events[2], endEventHandler, false);
@@ -113,7 +122,7 @@ export default create({
       onSave(canvas.value);
     };
 
-    const onSave = (canvas) => {
+    const onSave = (canvas: { toDataURL: (arg0: string, arg1?: number | undefined) => any }) => {
       let dataurl;
       switch (props.type) {
         case 'png':
@@ -136,7 +145,7 @@ export default create({
       }
     });
 
-    return { ...toRefs(state), canvas, wrap, isCanvasSupported, confirm, clear, classes };
+    return { ...toRefs(state), canvas, wrap, isCanvasSupported, confirm, clear, classes, translate };
   }
 });
 </script>

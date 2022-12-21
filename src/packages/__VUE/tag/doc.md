@@ -19,7 +19,6 @@ app.use(Tag);
 
 ```
 
-### 代码实例
 
 ### 基础用法
 
@@ -112,7 +111,7 @@ export default {
 :::demo
 ```html
 <template>
-  <nut-cell-group title="自定义">
+  <nut-cell-group title="颜色自定义">
     <nut-cell title="背景颜色">
       <template v-slot:link>
         <nut-tag color="#FA685D">标签</nut-tag>
@@ -135,8 +134,8 @@ export default {
 :::
 
 
-
-### Prop  
+## API
+### Props 
 
 | 字段       | 说明                                             | 类型    | 默认值    |
 |------------|--------------------------------------------------|---------|-----------|
@@ -155,7 +154,7 @@ export default {
 |---------|--------------|
 | default | 标签显示内容 |
 
-### Event
+### Events
 
 | 事件名称 | 说明     | 回调参数 |
 |----------|----------|----------|

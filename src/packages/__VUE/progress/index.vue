@@ -10,10 +10,27 @@
         <div
           class="nut-progress-text nut-progress-insidetext"
           ref="insideText"
-          :style="{ lineHeight: height, left: left }"
-          v-if="showText && textInside"
+          :style="{
+            lineHeight: height,
+            left: `${percentage}%`,
+            transform: `translate(-${+percentage}%,-50%)`,
+            background: textBackground || strokeColor
+          }"
+          v-if="showText && textInside && !slotDefault"
         >
           <span :style="textStyle">{{ percentage }}{{ isShowPercentage ? '%' : '' }} </span>
+        </div>
+        <div
+          ref="insideText"
+          :style="{
+            position: `absolute`,
+            top: `50%`,
+            left: `${percentage}%`,
+            transform: `translate(-${+percentage}%,-50%)`
+          }"
+          v-if="showText && textInside && slotDefault"
+        >
+          <slot></slot>
         </div>
       </div>
     </div>
@@ -22,16 +39,15 @@
         <span :style="textStyle">{{ percentage }}{{ isShowPercentage ? '%' : '' }}</span>
       </template>
       <template v-else-if="status == 'icon'">
-        <nut-icon size="16px" :name="iconName" :color="iconColor"></nut-icon>
+        <nut-icon v-bind="$attrs" size="16px" :name="iconName" :color="iconColor"></nut-icon>
       </template>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { log } from 'lzutf8';
-import { computed, onMounted, provide, reactive, nextTick, ref, watch } from 'vue';
-import { createComponent } from '../../utils/create';
+import { computed, onMounted, useSlots, ref, watch } from 'vue';
+import { createComponent } from '@/packages/utils/create';
 const { create } = createComponent('progress');
 export default create({
   props: {
@@ -65,7 +81,11 @@ export default create({
       default: ''
     },
     textColor: {
-      tyep: String,
+      type: String,
+      default: ''
+    },
+    textBackground: {
+      type: String,
       default: ''
     },
     iconName: {
@@ -81,11 +101,11 @@ export default create({
       default: true
     }
   },
-  setup(props, { emit }) {
+  setup(props) {
+    const slotDefault = !!useSlots().default;
     const height = ref(props.strokeWidth + 'px');
     const progressOuter = ref();
     const insideText = ref();
-    const left = ref();
     const bgStyle = computed(() => {
       return {
         width: props.percentage + '%',
@@ -97,35 +117,14 @@ export default create({
         color: props.textColor || ''
       };
     });
-
-    const slideLeft = (values: string | number) => {
-      if (props.textInside) {
-        let offsetWidth = progressOuter.value.offsetWidth;
-        let percentageWidth = progressOuter.value.offsetWidth * Number(values) * 0.01;
-        let insideTextWidth = insideText.value.offsetWidth;
-        left.value = percentageWidth - 5 + 'px';
-        if (offsetWidth == percentageWidth) {
-          left.value = percentageWidth - insideTextWidth + 'px';
-        }
-      }
-    };
-
-    watch(
-      () => props.percentage,
-      (values) => {
-        slideLeft(values);
-      }
-    );
-    onMounted(() => {
-      slideLeft(props.percentage);
-    });
+    onMounted(() => {});
     return {
       height,
       bgStyle,
       textStyle,
       progressOuter,
       insideText,
-      left
+      slotDefault
     };
   }
 });

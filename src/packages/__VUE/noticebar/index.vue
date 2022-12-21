@@ -23,7 +23,9 @@
         </view>
       </view>
       <view v-if="closeMode || rightIcon" class="right-icon" @click.stop="onClickIcon">
-        <slot name="right-icon"> <nut-icon :name="rightIcon ? rightIcon : 'close'" :color="color"></nut-icon></slot>
+        <slot name="right-icon">
+          <nut-icon v-bind="$attrs" :name="rightIcon ? rightIcon : 'close'" :color="color"></nut-icon
+        ></slot>
       </view>
     </view>
 
@@ -45,7 +47,7 @@
             class="horseLamp_list_item"
             v-for="(item, index) in scrollList"
             :key="index"
-            :style="{ height: height }"
+            :style="{ height: pxCheck(height) }"
             @click="go(item)"
           >
             {{ item }}
@@ -78,8 +80,9 @@ import {
   watch,
   h
 } from 'vue';
-import { createComponent } from '../../utils/create';
+import { createComponent } from '@/packages/utils/create';
 const { componentName, create } = createComponent('noticebar');
+import { pxCheck } from '@/packages/utils/pxCheck';
 
 interface StateProps {
   wrapWidth: number;
@@ -408,7 +411,8 @@ export default create({
       onAnimationEnd,
       go,
       handleClickIcon,
-      slots
+      slots,
+      pxCheck
     };
   }
 });

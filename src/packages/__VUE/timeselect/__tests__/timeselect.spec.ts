@@ -152,11 +152,11 @@ test('Events test', async () => {
       </template>
     `,
     setup() {
-      const { proxy } = getCurrentInstance() as any;
       const state = reactive({
         visible1: true,
         currentKey1: 0,
         currentTime1: [] as any[],
+        key: [],
         times1: [
           {
             key: 0,
@@ -191,7 +191,9 @@ test('Events test', async () => {
         }
       };
 
-      const handleSelected1 = (obj: any) => {};
+      const handleSelected1 = (obj: any) => {
+        state.key = obj;
+      };
 
       return {
         ...toRefs(state),
@@ -204,6 +206,8 @@ test('Events test', async () => {
   });
 
   // event test
-  // await wrapper.find('.nut-overlay').trigger('click');
-  // expect(wrapper.emitted('select')).toBeTruthy();
+  await nextTick();
+  const timepannel = wrapper.find('.nut-timeselect__content__pannel').findAll('.nut-timepannel')[1];
+  await timepannel.trigger('click');
+  expect(timepannel.classes()).toContain('nut-timepannel--curr');
 });

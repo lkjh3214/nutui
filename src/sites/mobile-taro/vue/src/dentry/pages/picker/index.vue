@@ -1,160 +1,359 @@
 <template>
   <div class="demo">
     <h2>基础用法</h2>
-    <nut-cell title="请选择城市" :desc="desc" @click="open(0)"></nut-cell>
-    <h2>默认选中项</h2>
-    <nut-cell title="请选择城市" :desc="desc1" @click="open(1)"></nut-cell>
-    <h2>多列样式</h2>
-    <nut-cell title="请选择时间" :desc="desc2" @click="open(2)"></nut-cell>
-    <h2>多级联动</h2>
-    <nut-cell title="请选择地址" :desc="desc3" @click="open(3)"></nut-cell>
-    <h2>动态设置</h2>
-    <nut-cell title="请选择地址" :desc="desc4" @click="open(4)"></nut-cell>
+    <nut-cell
+      title="请选择城市"
+      :desc="index"
+      @click="
+        () => {
+          show = true;
+        }
+      "
+    ></nut-cell>
 
     <nut-picker
       v-model:visible="show"
-      :list-data="listData1"
+      :columns="columns"
       title="城市选择"
-      @confirm="(val) => confirm(0, val)"
-      @close="close"
-    >
-    </nut-picker>
-    <nut-picker
-      v-model:visible="show1"
-      :list-data="listData1"
-      title="城市选择"
-      :defaultIndex="2"
-      @confirm="(val) => confirm(1, val)"
-      @close="close"
-    >
-    </nut-picker>
-    <nut-picker v-model:visible="show2" :list-data="listData2" title="多列选择" @confirm="confirm2" @close="close">
-    </nut-picker>
-    <nut-picker v-model:visible="show3" :list-data="listData3" title="地址选择" @confirm="confirm3"></nut-picker>
-    <nut-picker
-      v-model:visible="show4"
-      :list-data="listData4"
-      :demoIndex="demoIndex"
-      title="地址选择"
-      @change="onChange"
-      @confirm="(val) => confirm(4, val)"
+      :safeAreaInsetBottom="true"
+      @change="change"
+      @confirm="(options) => confirm('index', options)"
+      :showCancelText="false"
     ></nut-picker>
+
+    <h2>默认选中项</h2>
+    <nut-cell
+      title="请选择城市"
+      :desc="defult"
+      @click="
+        () => {
+          showDefult = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model="selectedValue"
+      v-model:visible="showDefult"
+      :columns="columns"
+      title="城市选择"
+      @confirm="(options) => confirm('defult', options)"
+    >
+    </nut-picker>
+
+    <h2>多列样式</h2>
+    <nut-cell
+      title="请选择时间"
+      :desc="multiple"
+      @click="
+        () => {
+          showMultiple = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model="selectedTime"
+      v-model:visible="showMultiple"
+      :columns="multipleColumns"
+      title="城市选择"
+      @confirm="(options) => confirm('multiple', options)"
+    >
+    </nut-picker>
+
+    <h2>多级联动</h2>
+    <nut-cell
+      title="请选择地址"
+      :desc="cascader"
+      @click="
+        () => {
+          showCascader = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model="selectedCascader"
+      v-model:visible="showCascader"
+      :columns="cascaderColumns"
+      title="城市选择"
+      @confirm="(options) => confirm('cascader', options)"
+    ></nut-picker>
+
+    <h2>异步获取</h2>
+    <nut-cell
+      title="请选择地址"
+      :desc="async"
+      @click="
+        () => {
+          showAsync = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model="asyncValue"
+      v-model:visible="showAsync"
+      :columns="asyncColumns"
+      title="城市选择"
+      @confirm="(options) => confirm('async', options)"
+    ></nut-picker>
+
+    <h2>自定义按钮</h2>
+    <nut-cell
+      title="请选择有效日期"
+      :desc="effect"
+      @click="
+        () => {
+          showEffect = true;
+        }
+      "
+    ></nut-cell>
+    <nut-picker
+      v-model:visible="showEffect"
+      :columns="effectColumns"
+      title="日期选择"
+      @confirm="(options) => confirm('effect', options)"
+    >
+      <nut-button block type="primary" @click="alwaysFun">永远有效</nut-button></nut-picker
+    >
   </div>
 </template>
 <script lang="ts">
-import { toRefs, ref } from 'vue';
-
+import { reactive, onMounted, ref, toRefs } from 'vue';
+import { PickerOption } from '../../../../../../../packages/__VUE/picker/types';
 export default {
   props: {},
   setup() {
-    const listData1 = ['南京市', '无锡市', '海北藏族自治区', '北京市', '连云港市', '浙江市', '江苏市'];
+    const selectedValue = ref(['ZheJiang']);
+    const selectedTime = ref(['Wednesday', 'Afternoon']);
+    const selectedCascader = ref(['FuJian', 'FuZhou', 'TaiJiang']);
+    const asyncValue = ref<string[]>([]);
+    const columsNum = ref([]);
+    const columns = ref([
+      { text: '南京市', value: 'NanJing' },
+      { text: '无锡市', value: 'WuXi' },
+      { text: '海北藏族自治区', value: 'ZangZu' },
+      { text: '北京市', value: 'BeiJing' },
+      { text: '连云港市', value: 'LianYunGang' },
+      { text: '浙江市', value: 'ZheJiang' },
+      { text: '江苏市', value: 'JiangSu' }
+    ]);
 
-    const listData2 = [
-      {
-        values: ['周一', '周二', '周三', '周四', '周五'],
-        defaultIndex: 2
-      },
-      // 第二列
-      {
-        values: ['上午', '下午', '晚上'],
-        defaultIndex: 1
-      }
-    ];
-    const listData3 = [
+    const multipleColumns = ref([
+      [
+        { text: '周一', value: 'Monday' },
+        { text: '周二', value: 'Tuesday' },
+        { text: '周三', value: 'Wednesday' },
+        { text: '周四', value: 'Thursday' },
+        { text: '周五', value: 'Friday' }
+      ],
+      [
+        { text: '上午', value: 'Morning' },
+        { text: '下午', value: 'Afternoon' },
+        { text: '晚上', value: 'Evening' }
+      ]
+    ]);
+
+    const cascaderColumns = ref([
       {
         text: '浙江',
+        value: 'ZheJiang',
         children: [
           {
             text: '杭州',
-            children: [{ text: '西湖区' }, { text: '余杭区' }]
+            value: 'HangZhou',
+            children: [
+              { text: '西湖区', value: 'XiHu' },
+              { text: '余杭区', value: 'YuHang' }
+            ]
           },
           {
             text: '温州',
-            children: [{ text: '鹿城区' }, { text: '瓯海区' }]
+            value: 'WenZhou',
+            children: [
+              { text: '鹿城区', value: 'LuCheng' },
+              { text: '瓯海区', value: 'OuHai' }
+            ]
           }
         ]
       },
       {
         text: '福建',
+        value: 'FuJian',
         children: [
           {
             text: '福州',
-            children: [{ text: '鼓楼区' }, { text: '台江区' }]
+            value: 'FuZhou',
+            children: [
+              { text: '鼓楼区', value: 'GuLou' },
+              { text: '台江区', value: 'TaiJiang' }
+            ]
           },
           {
             text: '厦门',
-            children: [{ text: '思明区' }, { text: '海沧区' }]
+            value: 'XiaMen',
+            children: [
+              { text: '思明区', value: 'SiMing' },
+              { text: '海沧区', value: 'HaiCang' }
+            ]
           }
         ]
       }
-    ];
-
-    const cities = {
-      浙江: ['杭州', '宁波', '温州', '嘉兴', '湖州'],
-      福建: ['福州', '厦门', '莆田', '三明']
-    };
-
-    const listData4 = ref([
-      {
-        values: Object.keys(cities)
-      },
-      {
-        values: cities['浙江']
-      }
     ]);
 
-    const show = ref(false);
-    const show1 = ref(false);
-    const show2 = ref(false);
-    const show3 = ref(false);
-    const show4 = ref(false);
-    const showList = [show, show1, show2, show3, show4];
-    const desc = ref(listData1[0]);
-    const desc1 = ref(listData1[2]);
-    const desc2 = ref(
-      `${listData2[0].values[listData2[0].defaultIndex]} ${listData2[1].values[listData2[1].defaultIndex]}`
-    );
-    const desc3 = ref(
-      `${listData3[0].text}
-      ${listData3[0].children[0].text}
-      ${listData3[0].children[0].children[0].text}`
-    );
-    const desc4 = ref('浙江 杭州');
-    const descList = [desc, desc1, desc2, desc3, desc4];
-    return {
-      listData1,
-      listData2,
-      listData3,
-      listData4,
-      show,
-      show1,
-      show2,
-      show3,
-      show4,
-      desc,
-      desc1,
-      desc2,
-      desc3,
-      desc4,
-      open: (index: number) => {
-        showList[index].value = true;
+    const effectColumns = ref([
+      { text: '2022-01', value: 'January' },
+      { text: '2022-02', value: 'February' },
+      { text: '2022-03', value: 'March' },
+      { text: '2022-04', value: 'April' },
+      { text: '2022-05', value: 'May' },
+      { text: '2022-06', value: 'June' },
+      { text: '2022-07', value: 'July' },
+      { text: '2022-08', value: 'August' },
+      { text: '2022-09', value: 'September' },
+      { text: '2022-10', value: 'October' },
+      { text: '2022-11', value: 'November' },
+      { text: '2022-12', value: 'December' }
+    ]);
+
+    const portColumns = ref([
+      {
+        text: '浙江',
+        value: 'ZheJiang',
+        children: []
       },
-      confirm: (type: number, res: any) => {
-        if (type == 4) {
-          descList[type].value = res[0] + ' ' + res[1];
-        } else {
-          descList[type].value = res;
-        }
-      },
-      confirm2: (res: any) => {
-        desc2.value = res.join(' ');
-      },
-      confirm3: (res: any) => {
-        desc3.value = res.join(' ');
-      },
-      onChange: (res: any, columnIndex, dataIndex) => {
-        listData4.value[1].values = cities[res[0]];
+      {
+        text: '福建',
+        value: 'FuJian',
+        children: []
       }
+    ]);
+    const asyncColumns = ref<PickerOption[]>([]);
+
+    const show = ref(false);
+    const showDefult = ref(false);
+    const showMultiple = ref(false);
+    const showCascader = ref(false);
+    const showAsync = ref(false);
+    const showEffect = ref(false);
+    const showPort = ref(false);
+    const showTitle = ref(false);
+
+    const desc = reactive({
+      index: '',
+      defult: '',
+      multiple: '',
+      cascader: '',
+      async: '',
+      effect: '',
+      title: ''
+    });
+
+    const open = (index: number) => {
+      switch (index) {
+        case 0:
+          show.value = true;
+          break;
+        case 1:
+          showDefult.value = true;
+          break;
+        case 2:
+          showMultiple.value = true;
+          break;
+        case 3:
+          showCascader.value = true;
+          break;
+        case 4:
+          showAsync.value = true;
+          break;
+        default:
+          showCascader.value = true;
+      }
+    };
+
+    onMounted(() => {
+      for (let i = 1; i < 60; i++) {
+        columsNum.value.push({ text: i, value: i });
+      }
+
+      setTimeout(() => {
+        asyncColumns.value = [
+          { text: '南京市', value: 'NanJing' },
+          { text: '无锡市', value: 'WuXi' },
+          { text: '海北藏族自治区', value: 'ZangZu' },
+          { text: '北京市', value: 'BeiJing' },
+          { text: '连云港市', value: 'LianYunGang' },
+          { text: '浙江市', value: 'ZheJiang' },
+          { text: '江苏市', value: 'JiangSu' }
+        ];
+
+        asyncValue.value = ['ZangZu'];
+      }, 500);
+    });
+
+    const confirm = (tag: string, { selectedValue }: { selectedValue: string[] }) => {
+      (desc as any)[tag] = selectedValue.join(',');
+    };
+    const change = ({ selectedValue }: { selectedValue: string[] }) => {
+      console.log(selectedValue);
+    };
+
+    const portChange = (chooseDate: any) => {
+      const { columnIndex, selectedOptions, selectedValue } = chooseDate;
+      console.log(chooseDate);
+      if (columnIndex == 0) {
+        //  if(portColumns.value[0].children.length == 0){
+
+        //  }
+        console.log('选择后更新');
+        portColumns.value[0].children = ([] as any).concat([
+          {
+            text: '杭州',
+            value: 'HangZhou',
+            children: [
+              { text: '西湖区', value: 'XiHu' },
+              { text: '余杭区', value: 'YuHang' }
+            ]
+          },
+          {
+            text: '温州',
+            value: 'WenZhou',
+            children: [
+              { text: '鹿城区', value: 'LuCheng' },
+              { text: '瓯海区', value: 'OuHai' }
+            ]
+          }
+        ]);
+      }
+    };
+
+    const alwaysFun = () => {
+      showEffect.value = false;
+      desc.effect = '永远有效';
+    };
+    return {
+      selectedValue,
+      selectedTime,
+      selectedCascader,
+      asyncValue,
+      columns,
+      show,
+      showDefult,
+      showAsync,
+      ...toRefs(desc),
+      showMultiple,
+      showCascader,
+      open,
+      multipleColumns,
+      cascaderColumns,
+      confirm,
+      change,
+      asyncColumns,
+      effectColumns,
+      showEffect,
+      alwaysFun,
+      columsNum,
+      showPort,
+      showTitle,
+      portColumns,
+      portChange
     };
   }
 };

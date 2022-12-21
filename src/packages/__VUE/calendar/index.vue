@@ -31,6 +31,8 @@
       :show-today="showToday"
       :show-title="showTitle"
       :show-sub-title="showSubTitle"
+      :to-date-animation="toDateAnimation"
+      :first-day-of-week="firstDayOfWeek"
     >
       <template v-slot:btn v-if="showTopBtn">
         <slot name="btn"> </slot>
@@ -65,6 +67,9 @@
     :show-today="showToday"
     :show-title="showTitle"
     :show-sub-title="showSubTitle"
+    :to-date-animation="toDateAnimation"
+    :first-day-of-week="firstDayOfWeek"
+    ref="calendarRef"
   >
     <template v-slot:btn v-if="showTopBtn">
       <slot name="btn"> </slot>
@@ -82,10 +87,12 @@
 </template>
 <script lang="ts">
 import { PropType, ref, computed } from 'vue';
-import { createComponent } from '../../utils/create';
+import { createComponent } from '@/packages/utils/create';
 const { create } = createComponent('calendar');
 import CalendarItem from '../calendaritem/index.vue';
-import Utils from '../../utils/date';
+import Utils from '@/packages/utils/date';
+import { useExpose } from '@/packages/utils/useExpose/index';
+
 type InputDate = string | string[];
 export default create({
   components: {
@@ -99,6 +106,10 @@ export default create({
     isAutoBackFill: {
       type: Boolean,
       default: false
+    },
+    toDateAnimation: {
+      type: Boolean,
+      default: true
     },
     poppable: {
       type: Boolean,
@@ -122,19 +133,19 @@ export default create({
     },
     title: {
       type: String,
-      default: '日历选择'
+      default: ''
     },
     confirmText: {
       type: String,
-      default: '确认'
+      default: ''
     },
     startText: {
       type: String,
-      default: '开始'
+      default: ''
     },
     endText: {
       type: String,
-      default: '结束'
+      default: ''
     },
     defaultValue: {
       type: [String, Array]
@@ -146,6 +157,11 @@ export default create({
     endDate: {
       type: String,
       default: Utils.getDay(365)
+    },
+    firstDayOfWeek: {
+      type: Number,
+      default: 0,
+      validator: (val: number) => val >= 0 && val <= 6
     }
   },
   emits: ['choose', 'close', 'update:visible', 'select'],
@@ -164,7 +180,12 @@ export default create({
     });
     // element refs
     const calendarRef = ref<null | HTMLElement>(null);
-
+    const scrollToDate = (date: string) => {
+      calendarRef.value?.scrollToDate(date);
+    };
+    useExpose({
+      scrollToDate
+    });
     // methods
     const update = () => {
       emit('update:visible', false);

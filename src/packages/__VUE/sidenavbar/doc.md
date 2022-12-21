@@ -14,10 +14,12 @@ import { SideNavBar, SubSideNavBar, SideNavBarItem } from '@nutui/nutui';
 import { SideNavBar, SubSideNavBar, SideNavBarItem } from '@nutui/nutui-taro';
 
 const app = createApp();
-app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
+app.use(SideNavBar);
+app.use(SubSideNavBar);
+app.use(SideNavBarItem);
 ```
 
-### 基本用法
+### 基础用法
 
 :::demo
 
@@ -79,7 +81,7 @@ app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
   <nut-popup position="right" v-model:visible="show3" :style="{ width, height }">
     <nut-sidenavbar :show="show3">
       <nut-sidenavbaritem ikey="1" title="人脸识别" @click="handleClick4('人脸识别')"></nut-sidenavbaritem>
-      <nut-sidenavbaritem ikey="2" title="云存自然语言处理"></nut-sidenavbaritem>
+      <nut-sidenavbaritem ikey="2" title="自然语言处理"></nut-sidenavbaritem>
       <nut-subsidenavbar title="图像理解" ikey="3" :open="false">
         <nut-sidenavbaritem ikey="4" title="菜品识别"></nut-sidenavbaritem>
         <nut-sidenavbaritem ikey="5" title="拍照购"></nut-sidenavbaritem>
@@ -119,12 +121,12 @@ app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
           state.navs = [
             {
               id: 16,
-              name: '异步abc16',
+              name: 'asyc abc16',
               arr: [{ pid: 16, id: 17, name: 'abc16-id17' }]
             },
             {
               id: 17,
-              name: '异步abc17',
+              name: 'asyc abc17',
               arr: [{ pid: 17, id: 18, name: 'abc17-id18' }]
             }
           ];
@@ -149,13 +151,13 @@ app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
 
 ## API
 
-### SideNavBar
+### SideNavBar Props
 
 | 字段                   | 说明                                                             | 类型    | 默认值 |
 |------------------------|----------------------------------------------------------------|---------|------|
 | offset                 | 导航缩进宽度                                                    | Number、String  | `15`
 
-### SubSideNavBar
+### SubSideNavBar Props
 
 | 字段                   | 说明                                                             | 类型    | 默认值 |
 |------------------------|----------------------------------------------------------------|---------|------|
@@ -163,7 +165,7 @@ app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
 | ikey                 | 导航唯一标识                                                    | String、Number  | ``
 | open                 | 导航是否默认展开                                                    | Boolean  | `true`
 
-### SideNavBarItem
+### SideNavBarItem Props
 
 | 字段                   | 说明                                                             | 类型    | 默认值 |
 |------------------------|----------------------------------------------------------------|---------|------|
@@ -171,13 +173,13 @@ app.use(SideNavBar).use(SubSideNavBar).use(SideNavBarItem);
 | ikey                 | 导航唯一标识                                                    | String、Number  | ``
 
 
-### SubSideNavBar Event
+### SubSideNavBar Events
 
 | 名称  | 说明     | 回调参数    |
 |-------|----------|-------------|
 | title-click | 导航点击 | - |
 
-### SideNavBarItem Event
+### SideNavBarItem Events
 
 | 名称  | 说明     | 回调参数    |
 |-------|----------|-------------|

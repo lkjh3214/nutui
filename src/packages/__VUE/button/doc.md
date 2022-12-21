@@ -17,7 +17,6 @@ const app = createApp();
 app.use(Button);
 ```
 
-## 代码演示
 
 ### 按钮类型
 
@@ -130,7 +129,7 @@ app.use(Button);
 
 :::
 
-#### 自定义图标
+### 自定义图标
 
 参照 `Icon` 组件说明中的自定义图标，其中 `icon-font-class-name` 对应 Icon 组件的 `font-class-name`，`icon-class-prefix` 对应 Icon 组件的 `class-prefix`。
 
@@ -151,7 +150,7 @@ app.use(Button);
   <nut-button size="large" type="primary">大号按钮</nut-button>
   <nut-button type="primary">普通按钮</nut-button>
   <nut-button size="small" type="primary">小型按钮</nut-button>
-  <nut-button size="mini" type="primary">小型按钮</nut-button>
+  <nut-button size="mini" type="primary">迷你按钮</nut-button>
 </template>
 ```
 

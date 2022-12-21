@@ -3,6 +3,7 @@
   "data": [
     {
       "name": "粗体 Icon",
+      "nameEn": "Bold Icon",
       "icons": [
         "order",
         "refresh",
@@ -29,6 +30,7 @@
     },
     {
       "name": "细体 Icon",
+      "nameEn": "Thin Icon",
       "icons": [
         "ask",
         "tips",
@@ -73,11 +75,14 @@
         "play-start",
         "play-double-back",
         "play-double-forward",
-        "voice"
+        "voice",
+        "image",
+        "image-error"
       ]
     },
     {
       "name": "应用图标",
+      "nameEn": "Application Icon",
       "icons": [
         "arrow-up",
         "arrow-down",
@@ -91,12 +96,19 @@
         "heart1",
         "heart-fill",
         "star-n",
-        "star-fill-n"
+        "star-fill-n",
+        "triangle-down",
+        "triangle-up"
       ]
     },
     {
       "name": "基础图标",
+      "nameEn": "Basic Icon",
       "icons": [
+        "rect-up",
+        "rect-down",
+        "rect-left",
+        "rect-right",
         "uploader",
         "mask-close",
         "circle-close",
@@ -127,6 +139,7 @@
   "style":[
     {
       "name": "通用动态样式",
+      "nameEn": "Universal Dynamic Style",
       "icons": [{
         "name":"dou-arrow-up",
         "animation-name":"am-jump",

@@ -10,6 +10,7 @@
             <nut-icon
               v-if="titleIcon"
               :name="titleIcon"
+              v-bind="$attrs"
               :size="titleIconSize"
               :color="titleIconColor"
               :class="['collapse-title-icon', titleIconPosition == 'left' ? 'titleIconLeft' : 'titleIconRight']"
@@ -20,21 +21,9 @@
             <template v-else>
               <view v-html="title" class="collapse-icon-title"></view>
             </template>
-            <!-- <view
-              v-html="title"
-              class="collapse-icon-title"
-              v-if="title"
-            ></view>
-            <mTitle v-else>
-              <slot name="mTitle"></slot>
-            </mTitle> -->
           </view>
         </view>
       </view>
-      <!-- <view v-if="subTitle" v-html="subTitle" class="subTitle"></view>
-      <view class="subTitle" v-else>
-        <slot name="sTitle"></slot>
-      </view> -->
       <view v-if="$slots.sTitle" class="subTitle">
         <slot name="sTitle"></slot>
       </view>
@@ -42,11 +31,17 @@
       <nut-icon
         v-if="icon"
         :name="icon"
+        v-bind="$attrs"
         :size="iconSize"
         :color="iconColor"
         :class="['collapse-icon', { 'col-expanded': openExpanded }, { 'collapse-icon-disabled': disabled }]"
         :style="iconStyle"
       ></nut-icon>
+    </view>
+    <view v-if="$slots.extraRender" class="collapse-extraWrapper">
+      <div class="collapse-extraRender">
+        <slot name="extraRender"></slot>
+      </div>
     </view>
     <view
       :class="['collapse-wrapper', openExpanded ? 'open-style' : 'close-style']"
@@ -70,12 +65,10 @@ import {
   computed,
   watch,
   getCurrentInstance,
-  ComponentInternalInstance,
-  VNode
+  ComponentInternalInstance
 } from 'vue';
 import Taro, { eventCenter, getCurrentInstance as getCurrentInstanceTaro } from '@tarojs/taro';
-import { createComponent } from '../../utils/create';
-import { useTaroRect } from '../../utils/useTaroRect';
+import { createComponent } from '@/packages/utils/create';
 const { create, componentName } = createComponent('collapse-item');
 
 export default create({
@@ -124,7 +117,7 @@ export default create({
       icon: parent.props.icon,
       iconSize: parent.props.iconSize,
       iconColor: parent.props.iconColor,
-      openExpanded: null,
+      openExpanded: false,
       // classDirection: 'right',
       iconStyle: {
         transform: 'rotate(0deg)',
@@ -172,18 +165,27 @@ export default create({
         // const query = Taro.createSelectorQuery();
         const query = Taro.getEnv() === 'ALIPAY' ? my.createSelectorQuery() : Taro.createSelectorQuery();
         query.selectAll('.collapse-content').boundingClientRect();
-        query.exec((res) => {
-          getH(res[0]);
+        query.exec((res: any[]) => {
+          if (Taro.getEnv() === 'WEB') {
+            getH5();
+          } else {
+            getH(res[0]);
+          }
         });
         if (!proxyData.openExpanded) {
           onTransitionEnd();
         }
       });
     };
-
     const open = () => {
       proxyData.openExpanded = !proxyData.openExpanded;
-      animation();
+      let time = contentRef.value.childNodes?.length || 1;
+      setTimeout(() => {
+        animation();
+      }, 500 * time);
+      // timer.value = setInterval(() => {
+      // animation();
+      // }, 600);
     };
 
     const defaultOpen = () => {
@@ -196,17 +198,12 @@ export default create({
     const currentName = computed(() => props.name);
     const toggleOpen = () => {
       if (parent.props.accordion) {
-        parent.children.forEach((item: any, index: number) => {
-          if (currentName.value == item.name) {
-            item.changeOpen(!item.openExpanded);
-          } else {
-            item.changeOpen(false);
-            item.animation();
-          }
-        });
         nextTick(() => {
-          parent.changeVal(currentName.value);
-          animation();
+          if (currentName.value == parent.props.active) {
+            open();
+          } else {
+            parent.changeVal(currentName.value);
+          }
         });
       } else {
         parent.changeValAry(props.name);
@@ -231,23 +228,21 @@ export default create({
       }
     });
 
-    watch(
-      () => ctx?.slots?.default?.(),
-      (vnodes: VNode[]) => {
-        setTimeout(() => {
-          getRefHeight();
-        }, 300);
-      }
-    );
-
+    // watch(
+    //   () => ctx?.slots?.default?.(),
+    //   () => {
+    //     getRefHeight();
+    //   }
+    // );
     const getH = (list: any) => {
       parent.children.forEach((item1: any, index1: number) => {
         let ary: any = Array.from(item1.$el.children);
         let _uid = ary[1].children[0]['uid'];
-        let tm = list.filter((item2: any) => item2.id == _uid);
+        let tm = list?.filter((item2: any) => item2.id == _uid);
         if (tm && tm.length > 0) {
           let h = tm[0]['height'];
           item1.conHeight = h;
+          // resetHeight(h);
         }
       });
     };
@@ -257,14 +252,29 @@ export default create({
         let ary: any = Array.from(item1.$el.children);
         let h = ary[1].children[0]['offsetHeight'];
         item1.conHeight = h;
+        // resetHeight(h);
       });
     };
+    // const prevHeight = ref(0);
+    // const nums = ref(0);
+    // const timer = ref();
+
+    // const resetHeight = (h: number) => {
+    //   // console.log(prevHeight.value, h, nums.value);
+    //   if (prevHeight.value >= h && nums.value > 5) {
+    //     clearInterval(timer.value);
+    //     timer.value = null;
+    //   } else {
+    //     nums.value++;
+    //   }
+    //   prevHeight.value = h;
+    // };
 
     const getRefHeight = () => {
       const query = Taro.getEnv() === 'ALIPAY' ? my.createSelectorQuery() : Taro.createSelectorQuery();
       // const query = Taro.createSelectorQuery();
       query.selectAll('.collapse-content').boundingClientRect();
-      query.exec((res) => {
+      query.exec((res: any[]) => {
         if (Taro.getEnv() === 'WEB') {
           getH5();
         } else {
@@ -272,11 +282,9 @@ export default create({
         }
       });
     };
-
     onMounted(() => {
       const { name } = props;
       const active = parent && parent.props.active;
-
       if (typeof active == 'number' || typeof active == 'string') {
         if (name == active) {
           defaultOpen();
@@ -295,11 +303,6 @@ export default create({
           getRefHeight();
         });
       }
-      // const query = Taro.createSelectorQuery();
-      // query.selectAll('.collapse-content').boundingClientRect();
-      // query.exec((res) => {
-      //   getH(res[0]);
-      // });
     });
 
     return {

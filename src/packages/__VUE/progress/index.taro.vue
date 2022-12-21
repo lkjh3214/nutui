@@ -3,7 +3,6 @@
     <div
       class="nut-progress-outer"
       :id="'nut-progress-outer-taro-' + randRef"
-      ref="progressOuter"
       :class="[showText && !textInside ? 'nut-progress-outer-part' : '', size ? 'nut-progress-' + size : '']"
       :style="{ height: height }"
     >
@@ -11,11 +10,27 @@
         <div
           class="nut-progress-text nut-progress-insidetext"
           ref="insideText"
-          :id="'nut-progress-insidetext-taro-' + randRef"
-          :style="{ lineHeight: height, left: left }"
-          v-if="showText && textInside"
+          :style="{
+            lineHeight: height,
+            left: `${percentage}%`,
+            transform: `translate(-${+percentage}%,-50%)`,
+            background: textBackground || strokeColor
+          }"
+          v-if="showText && textInside && !slotDefault"
         >
           <span :style="textStyle">{{ percentage }}{{ isShowPercentage ? '%' : '' }}</span>
+        </div>
+        <div
+          ref="insideText"
+          :style="{
+            position: `absolute`,
+            top: `50%`,
+            left: `${percentage}%`,
+            transform: `translate(-${+percentage}%,-50%)`
+          }"
+          v-if="showText && textInside && slotDefault"
+        >
+          <slot></slot>
         </div>
       </div>
     </div>
@@ -24,15 +39,15 @@
         <span :style="textStyle">{{ percentage }}{{ isShowPercentage ? '%' : '' }} </span>
       </template>
       <template v-else-if="status == 'icon'">
-        <nut-icon size="16px" :name="iconName" :color="iconColor"></nut-icon>
+        <nut-icon v-bind="$attrs" size="16px" :name="iconName" :color="iconColor"></nut-icon>
       </template>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, onMounted, provide, reactive, nextTick, ref, watch } from 'vue';
-import { createComponent } from '../../utils/create';
+import { computed, onMounted, useSlots, ref, watch } from 'vue';
+import { createComponent } from '@/packages/utils/create';
 import Taro, { eventCenter, getCurrentInstance } from '@tarojs/taro';
 import { log } from 'lzutf8';
 const { create } = createComponent('progress');
@@ -68,7 +83,11 @@ export default create({
       default: ''
     },
     textColor: {
-      tyep: String,
+      type: String,
+      default: ''
+    },
+    textBackground: {
+      type: String,
       default: ''
     },
     iconName: {
@@ -85,9 +104,8 @@ export default create({
     }
   },
   setup(props, { emit }) {
+    const slotDefault = !!useSlots().default;
     const height = ref(props.strokeWidth + 'px');
-    const progressOuter = ref<any>();
-    const left = ref();
     const insideText = ref();
     const refRandomId = Math.random().toString(36).slice(-8);
     const randRef = ref(refRandomId);
@@ -102,51 +120,17 @@ export default create({
         color: props.textColor || ''
       };
     });
-    const slideLeft = async (values: string | number) => {
-      if (Taro.getEnv() === 'WEB') {
-        if (!props.textInside) return;
-        let offsetWidth = progressOuter.value.offsetWidth;
-        let percentageWidth = progressOuter.value.offsetWidth * Number(values) * 0.01;
-        let insideTextWidth = insideText.value.offsetWidth;
-        left.value = percentageWidth - 5 + 'px';
-        if (offsetWidth == percentageWidth) {
-          left.value = percentageWidth - insideTextWidth + 'px';
-        }
-      } else {
-        if (!props.textInside) return;
-        const query = Taro.createSelectorQuery() as any;
-        query.select('#nut-progress-outer-taro-' + randRef.value).boundingClientRect();
-        query.select('#nut-progress-insidetext-taro-' + randRef.value).boundingClientRect();
-        query.exec((res: any) => {
-          let offsetWidth = res[0].width;
-          let percentageWidth = res[0].width * Number(values) * 0.01;
-          let insideTextWidth = res[1].width;
-          left.value = percentageWidth - 4 + 'px';
-          if (offsetWidth == percentageWidth) {
-            left.value = percentageWidth - insideTextWidth + 'px';
-          }
-        });
-      }
-    };
-    watch(
-      () => props.percentage,
-      (values) => {
-        slideLeft(values);
-      }
-    );
+
     onMounted(() => {
-      eventCenter.once((getCurrentInstance() as any).router.onReady, () => {
-        slideLeft(props.percentage);
-      });
+      eventCenter.once((getCurrentInstance() as any).router.onReady, () => {});
     });
     return {
       height,
       bgStyle,
       textStyle,
-      progressOuter,
-      left,
       insideText,
-      randRef
+      randRef,
+      slotDefault
     };
   }
 });

@@ -52,6 +52,7 @@
       :autoplay="autoplay"
       :loop="loop"
       @timeupdate="onTimeupdate"
+      @canplay="onCanplay"
       @ended="audioEnd"
       :muted="hanMuted"
     >
@@ -60,65 +61,51 @@
 </template>
 <script lang="ts">
 import { toRefs, ref, onMounted, reactive, watch, provide } from 'vue';
-import { createComponent } from '../../utils/create';
+import { createComponent } from '@/packages/utils/create';
 const { componentName, create } = createComponent('audio');
 
 export default create({
   props: {
     url: {
       type: String,
-      default() {
-        return '';
-      }
+      default: ''
     },
     // 静音
     muted: {
       type: Boolean,
-      default() {
-        return false;
-      }
+      default: false
     },
     // 自动播放
     autoplay: {
       type: Boolean,
-      default() {
-        return false;
-      }
+      default: false
     },
 
     // 循环播放
     loop: {
       type: Boolean,
-      default() {
-        return false;
-      }
+      default: false
     },
 
     // 是否预加载音频
     preload: {
       type: String,
-      default() {
-        return 'auto';
-      }
+      default: 'auto'
     },
     /* 总时长秒数 */
     second: {
       type: Number,
-      default() {
-        return 0;
-      }
+      default: 0
     },
 
     // 展示的形式   controls 控制面板   progress 进度条  icon 图标 none 自定义
     type: {
       type: String,
-      default() {
-        return 'progress';
-      }
+      default: 'progress'
     }
   },
   components: {},
-  emits: ['fastBack', 'play', 'forward', 'ended', 'changeProgress', 'mute'],
+  emits: ['fastBack', 'play', 'forward', 'ended', 'changeProgress', 'mute', 'can-play'],
 
   setup(props, { emit }) {
     const audioRef = ref(null);
@@ -130,7 +117,8 @@ export default create({
       duration: '00:00:00',
       second: 0,
       hanMuted: props.muted,
-      playing: props.autoplay
+      playing: props.autoplay,
+      handPlaying: false
     });
 
     onMounted(() => {
@@ -157,41 +145,48 @@ export default create({
       } catch (e) {
         console.log((e as any).message);
       }
-
-      // 获取当前音频播放时长
-      setTimeout(() => {
-        // 自动播放
-        if (props.autoplay) {
-          if (audioRef.value && audioRef.value.paused) {
-            audioRef.value.play();
-          }
-        }
-        audioData.second = audioRef.value.duration;
-        audioData.duration = formatSeconds(audioRef.value.duration);
-      }, 500);
     });
 
+    // audio canplay 事件触发时
+    const onCanplay = (e: Event) => {
+      const audioR = audioRef.value as any;
+      // 自动播放
+      if (props.autoplay) {
+        if (audioR && audioR.paused) {
+          audioR.play();
+        }
+      }
+      // 获取当前音频播放时长
+      audioData.second = audioR.duration;
+      audioData.duration = formatSeconds(audioR.duration);
+
+      emit('can-play', e);
+    };
+
     //播放时间
-    const onTimeupdate = (e) => {
+    const onTimeupdate = (e: any) => {
       audioData.currentTime = parseInt(e.target.currentTime);
     };
 
     //后退
     const fastBack = () => {
-      audioData.currentTime--;
-      audioRef.value.currentTime = audioData.currentTime;
+      if (audioData.currentTime > 0) {
+        audioData.currentTime--;
+      }
+      (audioRef.value as any).currentTime = audioData.currentTime;
 
       emit('fastBack', audioData.currentTime);
     };
 
     //改变播放状态
     const changeStatus = () => {
+      const audioR = audioRef.value as any;
       if (audioData.playing) {
-        audioRef.value.pause();
+        audioR.pause();
 
         audioData.handPlaying = false;
       } else {
-        audioRef.value.play();
+        audioR.play();
         audioData.handPlaying = true;
       }
       audioData.playing = !audioData.playing;
@@ -202,16 +197,16 @@ export default create({
     //快进
     const forward = () => {
       audioData.currentTime++;
-      audioRef.value.currentTime = audioData.currentTime;
+      (audioRef.value as any).currentTime = audioData.currentTime;
 
       emit('forward', audioData.currentTime);
     };
 
     //处理
-    const handle = (val) => {
+    const handle = (val: number | string) => {
       //毫秒数转为时分秒
-      audioData.currentDuration = formatSeconds(val);
-      audioData.percent = (val / audioData.second) * 100;
+      audioData.currentDuration = formatSeconds(val as string);
+      audioData.percent = ((val as number) / audioData.second) * 100;
     };
     //播放结束 修改播放状态
     const audioEnd = () => {
@@ -220,10 +215,11 @@ export default create({
     };
 
     //点击进度条
-    const progressChange = (val) => {
-      audioRef.value.currentTime = (audioData.second * val) / 100;
+    const progressChange = (val: number) => {
+      const ar = audioRef.value as any;
+      ar.currentTime = (audioData.second * val) / 100;
 
-      emit('changeProgress', audioRef.value.currentTime);
+      emit('changeProgress', ar.currentTime);
     };
 
     // 静音
@@ -233,38 +229,18 @@ export default create({
       emit('mute', audioData.hanMuted);
     };
 
-    const formatSeconds = (value) => {
-      let theTime = parseInt(value); // 秒
-      let theTime1 = 0; // 分
-      let theTime2 = 0; // 小时
-      if (theTime > 60) {
-        theTime1 = parseInt(theTime / 60);
-        theTime = parseInt(theTime % 60);
-        if (theTime1 > 60) {
-          theTime2 = parseInt(theTime1 / 60);
-          theTime1 = parseInt(theTime1 % 60);
-        }
+    const formatSeconds = (value: string) => {
+      if (!value) {
+        return '00:00:00';
       }
-      let result = '' + parseInt(theTime);
-      if (result < 10) {
-        result = '0' + result;
-      }
-      if (theTime1 > 0) {
-        result = '' + parseInt(theTime1) + ':' + result;
-        if (theTime1 < 10) {
-          result = '0' + result;
-        }
-      } else {
-        result = '00:' + result;
-      }
-      if (theTime2 > 0) {
-        result = '' + parseInt(theTime2) + ':' + result;
-        if (theTime2 < 10) {
-          result = '0' + result;
-        }
-      } else {
-        result = '00:' + result;
-      }
+      let time = parseInt(value);
+      let hours = Math.floor(time / 3600);
+      let minutes = Math.floor((time - hours * 3600) / 60);
+      let seconds = time - hours * 3600 - minutes * 60;
+      let result = '';
+      result += ('0' + hours.toString()).slice(-2) + ':';
+      result += ('0' + minutes.toString()).slice(-2) + ':';
+      result += ('0' + seconds.toString()).slice(-2);
       return result;
     };
 
@@ -295,7 +271,8 @@ export default create({
       progressChange,
       audioEnd,
       onTimeupdate,
-      handleMute
+      handleMute,
+      onCanplay
     };
   }
 });

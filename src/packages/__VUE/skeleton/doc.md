@@ -19,7 +19,6 @@ app.use(Skeleton);
 
 ```
 
-### 代码实例
 
 ### 基础用法
 
@@ -65,6 +64,29 @@ app.use(Skeleton);
 ```
 :::
 
+### 图片组合
+
+:::demo
+```html
+<template>
+  <div class="pic-compose">
+    <nut-skeleton width="250px" height="15px" title animated row="3" class="item"> </nut-skeleton>
+    <nut-skeleton width="250px" height="15px" title animated row="3" class="item"> </nut-skeleton>
+  </div>
+</template>
+```
+```css
+<style>
+.pic-compose {
+  display: flex;
+  justify-content: space-between;
+  .item {
+    width: 47%;
+  }
+}
+</style>
+```
+:::
 
 ### 显示子组件
 
@@ -135,8 +157,8 @@ export default {
 
 
 
-
-### Prop  
+## API
+### Props
 
 | 字段       | 说明                                             | 类型    | 默认值    |
 |------------|-------------------------------------------------|---------|----------|

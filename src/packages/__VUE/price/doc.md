@@ -19,7 +19,7 @@ app.use(Price);
 ```
 
 
-### 基本用法 small normal large
+### 基础用法 small normal large
 
 :::demo
 
@@ -45,13 +45,14 @@ app.use(Price);
 
 :::
 
-### 调整 symbol 符号位置
+
+### 划线价
 
 :::demo
 
 ``` html
 <template>
-    <nut-price :price="8888.01" position="after" symbol="元" size="normal" :need-symbol="true" :thousands="true" />
+    <nut-price :price="8888" decimal-digits="0" size="normal" :need-symbol="true" :thousands="true" strike-through />
 </template>
 ```
 
@@ -75,6 +76,18 @@ app.use(Price);
 ``` html
 <template>
     <nut-price :price="15213.1221" :decimal-digits="3" :need-symbol="true" :thousands="true" />
+</template>
+```
+
+:::
+
+### 调整 symbol 符号位置
+
+:::demo
+
+``` html
+<template>
+    <nut-price :price="8888.01" position="after" symbol="元" size="normal" :need-symbol="true" :thousands="true" />
 </template>
 ```
 
@@ -105,15 +118,16 @@ app.use(Price);
 </script>
 ```
 :::
-
-### Prop
+## API
+### Props
 
 | 字段           | 说明                                    | 类型    | 默认值 |
 |----------------|-----------------------------------------|---------|--------|
-| price          | 价格数量                                | Number  | 0      |
-| need-symbol    | 是否需要加上 symbol 符号                | Boolean | true   |
-| symbol         | 符号类型                                | String  | &yen;  |
-| decimal-digits | 小数位位数                              | Number  | 2      |
-| thousands      | 是否按照千分号形式显示                  | Boolean | false  |
-| position       | 符号显示在(价格)前或者后(before、after) | String  | before |
-| size           | 价格尺寸(large、normal、small)          | String  | large |
+| price          | 价格数量                                | Number ｜ String | 0      |
+| need-symbol    | 是否需要加上 symbol 符号                 | Boolean          | true   |
+| symbol         | 符号类型                                | String           | &yen;  |
+| decimal-digits | 小数位位数                              | Number ｜ String  | 2     |
+| thousands      | 是否按照千分号形式显示                    | Boolean          | false  |
+| position       | 符号显示在价格前或者后，`before`、`after`  | String           | before |
+| size           | 价格尺寸，`large`、`normal`、`small`     | String           | large |
+| strike-through`v3.3.1`          | 是否展示划线价    | Boolean           | false |

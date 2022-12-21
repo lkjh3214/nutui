@@ -1,7 +1,7 @@
 <script lang="ts">
 import { h, watch, provide, computed, ComponentInternalInstance, reactive, ComponentPublicInstance } from 'vue';
-import { createComponent } from '../../utils/create';
-import { useExpose } from '../../utils/useExpose/index';
+import { createComponent } from '@/packages/utils/create';
+import { useExpose } from '@/packages/utils/useExpose/index';
 const { create, componentName } = createComponent('checkboxgroup');
 
 export default create({
@@ -13,6 +13,10 @@ export default create({
     disabled: {
       type: Boolean,
       default: false
+    },
+    max: {
+      type: Number,
+      default: 0
     }
   },
   emits: ['change', 'update:modelValue'],
@@ -27,24 +31,42 @@ export default create({
       }
     };
 
-    const updateValue = (value: any[]) => {
+    const updateValue = (value: string[]) => {
       emit('update:modelValue', value);
       emit('change', value);
     };
 
     const toggleAll = (checked: boolean) => {
-      let values: any[] = [];
+      let values: string[] = [];
       if (!!checked) {
         state.children.forEach((item: any) => {
-          values.push(item?.label);
+          if (!item?.disabled) {
+            values.push(item?.label);
+          }
         });
       }
+      emit('update:modelValue', values);
+    };
+
+    const toggleReverse = () => {
+      let values = props.modelValue.slice();
+      state.children.forEach((item: any) => {
+        let findIndex = values.findIndex((value: any) => value === item.label);
+        if (findIndex > -1) {
+          values.splice(findIndex, 1);
+        } else {
+          if (!item?.disabled) {
+            values.push(item?.label);
+          }
+        }
+      });
       emit('update:modelValue', values);
     };
 
     provide('parent', {
       value: computed(() => props.modelValue),
       disabled: computed(() => props.disabled),
+      max: computed(() => props.max),
       updateValue,
       relation
     });
@@ -56,7 +78,7 @@ export default create({
       }
     );
 
-    useExpose({ toggleAll });
+    useExpose({ toggleAll, toggleReverse });
 
     return () => {
       return h(

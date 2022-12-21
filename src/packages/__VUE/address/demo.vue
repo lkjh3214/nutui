@@ -1,7 +1,7 @@
 <template>
   <div class="demo">
-    <h2>选择自定义地址</h2>
-    <nut-cell title="选择地址" :desc="one" is-link @click="showAddress"></nut-cell>
+    <h2>{{ translate('customAddress') }}</h2>
+    <nut-cell :title="translate('title')" :desc="one" is-link @click="showAddress"></nut-cell>
 
     <nut-address
       v-model:visible="normal"
@@ -11,11 +11,10 @@
       :town="town"
       @change="(cal) => onChange(cal, 'normal')"
       @close="close1"
-      custom-address-title="请选择所在地区"
     ></nut-address>
 
-    <h2>选中省市区</h2>
-    <nut-cell title="选择地址" :desc="six" is-link @click="showSelected"></nut-cell>
+    <h2>{{ translate('selectCity') }}</h2>
+    <nut-cell :title="translate('title')" :desc="six" is-link @click="showSelected"></nut-cell>
 
     <nut-address
       v-model="value"
@@ -26,12 +25,11 @@
       :town="town"
       @change="(cal) => onChange(cal, 'select')"
       @close="close6"
-      custom-address-title="请选择所在地区"
       :columns-placeholder="placeholder"
     ></nut-address>
 
-    <h2>选择自定义地址2</h2>
-    <nut-cell title="选择地址" :desc="five" is-link @click="showAddress2"></nut-cell>
+    <h2>{{ translate('customAddress2') }}</h2>
+    <nut-cell :title="translate('title')" :desc="five" is-link @click="showAddress2"></nut-cell>
 
     <nut-address
       v-model="value2"
@@ -45,11 +43,10 @@
       @change="(cal) => onChange(cal, 'normal2')"
       @close="close5"
       :columns-placeholder="placeholder"
-      custom-address-title="请选择所在地区"
     ></nut-address>
 
-    <h2>选择已有地址</h2>
-    <nut-cell title="选择地址" :desc="two" is-link @click="showAddressExist"></nut-cell>
+    <h2>{{ translate('existAddress') }}</h2>
+    <nut-cell :title="translate('title')" :desc="two" is-link @click="showAddressExist"></nut-cell>
 
     <nut-address
       v-model:visible="exist"
@@ -59,11 +56,10 @@
       @close="close2"
       :is-show-custom-address="false"
       @selected="selected"
-      exist-address-title="配送至"
     ></nut-address>
 
-    <h2>自定义图标</h2>
-    <nut-cell title="选择地址" :desc="three" is-link @click="showCustomImg"></nut-cell>
+    <h2>{{ translate('icon') }}</h2>
+    <nut-cell :title="translate('title')" :desc="three" is-link @click="showCustomImg"></nut-cell>
 
     <nut-address
       v-model:visible="customImg"
@@ -76,10 +72,16 @@
       :default-icon="defaultIcon"
       :selected-icon="selectedIcon"
       :close-btn-icon="closeBtnIcon"
-    ></nut-address>
+    >
+      <template #bottom>
+        <div class="nut-address-custom-buttom">
+          <div class="btn">自定义按钮</div>
+        </div>
+      </template>
+    </nut-address>
 
-    <h2>自定义地址与已有地址切换</h2>
-    <nut-cell title="选择地址" :desc="four" is-link @click="showAddressOther"></nut-cell>
+    <h2>{{ translate('change') }}</h2>
+    <nut-cell :title="translate('title')" :desc="four" is-link @click="showAddressOther"></nut-cell>
 
     <nut-address
       v-model:visible="other"
@@ -93,7 +95,6 @@
       @change="(cal) => onChange(cal, 'other')"
       @close="close4"
       @selected="selected"
-      custom-and-exist-title="选择其他地址"
       @switch-module="switchModule"
       @close-mask="closeMask"
     ></nut-address>
@@ -101,9 +102,37 @@
 </template>
 
 <script lang="ts">
-import { createComponent } from '../../utils/create';
-import { reactive, ref, toRefs } from 'vue';
-const { createDemo } = createComponent('address');
+import { createComponent } from '@/packages/utils/create';
+import { onMounted, reactive, ref, toRefs } from 'vue';
+import { useTranslate } from '@/sites/assets/util/useTranslate';
+const { createDemo, translate } = createComponent('address');
+
+const initTranslate = () =>
+  useTranslate({
+    'zh-CN': {
+      basic: '基本用法',
+      title: '选择地址',
+      customAddress: '选择自定义地址',
+      selectCity: '选中省市区',
+      customAddress2: '选择自定义地址2',
+      existAddress: '选择已有地址',
+      icon: '自定义图标',
+      change: '自定义地址与已有地址切换',
+      textAddress: '北京朝阳区八里庄街道'
+    },
+    'en-US': {
+      basic: 'Basic Usage',
+      title: 'Choose Address',
+      customAddress: 'Choose Custom Address',
+      selectCity: 'Choose City',
+      customAddress2: 'Choose Custom Address2',
+      existAddress: 'Choose Exist Address',
+      icon: 'Custom Icon',
+      change: 'Custom Or Exist',
+      textAddress: 'Balizhuang Street, Chaoyang District, Beijing'
+    }
+  });
+
 interface CalBack {
   next: string;
   value: string;
@@ -137,21 +166,16 @@ interface AddressResult extends AddressList {
 export default createDemo({
   props: {},
   setup() {
+    initTranslate();
     const address = reactive({
-      province: [
-        { id: 1, name: '北京', title: 'B' },
-        { id: 2, name: '广西', title: 'G' },
-        { id: 3, name: '江西', title: 'J' },
-        { id: 4, name: '四川', title: 'S' },
-        { id: 5, name: '浙江', title: 'Z' }
-      ],
+      province: [],
       city: [
         { id: 7, name: '朝阳区', title: 'C' },
         { id: 8, name: '崇文区', title: 'C' },
         { id: 9, name: '昌平区', title: 'C' },
         { id: 6, name: '石景山区', title: 'S' },
         { id: 3, name: '八里庄街道', title: 'B' },
-        { id: 9, name: '北苑', title: 'B' }
+        { id: 10, name: '北苑', title: 'B' }
       ],
       country: [
         { id: 3, name: '八里庄街道', title: 'B' },
@@ -159,6 +183,18 @@ export default createDemo({
         { id: 4, name: '常营乡', title: 'C' }
       ],
       town: []
+    });
+
+    onMounted(() => {
+      setTimeout(() => {
+        address.province = [
+          { id: 1, name: '北京', title: 'B' },
+          { id: 2, name: '广西', title: 'G' },
+          { id: 3, name: '江西', title: 'J' },
+          { id: 4, name: '四川', title: 'S' },
+          { id: 5, name: '浙江', title: 'Z' }
+        ];
+      }, 1000);
     });
 
     const placeholder = ref(['请选择省', '请选择市', '请选择县']);
@@ -196,7 +232,7 @@ export default createDemo({
       {
         id: 2,
         addressDetail: '',
-        cityName: '钓鱼岛全区',
+        cityName: '钓鱼岛',
         countyName: '',
         provinceName: '钓鱼岛',
         selectedAddress: false,
@@ -218,12 +254,12 @@ export default createDemo({
     ]);
 
     const text = reactive({
-      one: '请选择地址',
-      two: '请选择地址',
-      three: '请选择地址',
-      four: '请选择地址',
-      five: '北京朝阳区八里庄街道',
-      six: '北京朝阳区八里庄街道'
+      one: translate('title'),
+      two: translate('title'),
+      three: translate('title'),
+      four: translate('title'),
+      five: translate('textAddress'),
+      six: translate('textAddress')
     });
 
     const showAddress = () => {
@@ -239,6 +275,7 @@ export default createDemo({
     };
 
     const onChange = (cal: CalBack, tag: string) => {
+      console.log('地址选择', cal);
       const name = (address as any)[cal.next];
       if (name.length < 1) {
         (showPopup as any)[tag] = false;
@@ -338,6 +375,7 @@ export default createDemo({
       switchModule,
       closeMask,
       placeholder,
+      translate,
       ...toRefs(icon),
       ...toRefs(text),
       ...toRefs(showPopup),

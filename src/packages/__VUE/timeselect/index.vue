@@ -3,16 +3,18 @@
     position="bottom"
     closeable
     round
-    :isWrapTeleport="isWrapTeleport"
+    :teleportDisable="teleportDisable"
     :visible="visible"
     :style="popStyle"
+    :lock-scroll="lockScroll"
     @click-overlay="close"
     @click-close-icon="close"
   >
     <view :class="classes">
       <view class="nut-timeselect__title">
         <view class="nut-timeselect__title__fixed">
-          {{ title }}
+          <span v-if="!$slots.title">{{ title || translate('pickupTime') }}</span>
+          <slot name="title" v-else></slot>
         </view>
       </view>
       <view class="nut-timeselect__content">
@@ -28,8 +30,8 @@
 </template>
 <script lang="ts">
 import { computed, provide } from 'vue';
-import { createComponent } from '../../utils/create';
-const { componentName, create } = createComponent('timeselect');
+import { createComponent } from '@/packages/utils/create';
+const { componentName, create, translate } = createComponent('timeselect');
 export default create({
   props: {
     visible: {
@@ -42,7 +44,7 @@ export default create({
     },
     title: {
       type: String,
-      default: '取件时间'
+      default: ''
     },
     currentKey: {
       type: [Number, String],
@@ -54,7 +56,11 @@ export default create({
         return [];
       }
     },
-    isWrapTeleport: {
+    lockScroll: {
+      type: [Boolean],
+      default: false
+    },
+    teleportDisable: {
       type: Boolean,
       default: false
     }
@@ -90,7 +96,9 @@ export default create({
     return {
       classes,
       popStyle,
-      close
+      props,
+      close,
+      translate
     };
   }
 });

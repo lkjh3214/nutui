@@ -17,7 +17,6 @@ app.use(Divider);
 ```
 
 
-## 代码演示
 
 ### 基础用法
 
@@ -27,9 +26,7 @@ app.use(Divider);
 
 ``` html
 <template>
-    <nut-cell>
-        <nut-divider />
-    </nut-cell>
+  <nut-divider />
 </template>
 ```
 
@@ -37,15 +34,13 @@ app.use(Divider);
 
 ### 展示文本
 
-通过插槽在可以分割线中间插入内容。
+通过插槽可以在分割线中间插入内容。
 
 :::demo
 
 ``` html
 <template>
-    <nut-cell>
-        <nut-divider>文本</nut-divider>
-    </nut-cell>
+  <nut-divider>文本</nut-divider>
 </template>
 ```
 
@@ -59,12 +54,8 @@ app.use(Divider);
 
 ``` html
 <template>
-    <nut-cell>
-        <nut-divider content-position="left">文本</nut-divider>
-    </nut-cell>
-    <nut-cell>
-        <nut-divider content-position="right">文本</nut-divider>
-    </nut-cell>
+  <nut-divider content-position="left">文本</nut-divider>
+  <nut-divider content-position="right">文本</nut-divider>
 </template>
 ```
 
@@ -78,9 +69,7 @@ app.use(Divider);
 
 ``` html
 <template>
-    <nut-cell>
-        <nut-divider dashed>文本</nut-divider>
-    </nut-cell>
+  <nut-divider dashed>文本</nut-divider>
 </template>
 ```
 
@@ -94,9 +83,27 @@ app.use(Divider);
 
 ``` html
 <template>
-    <nut-cell>
-        <nut-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">文本</nut-divider>
-    </nut-cell>
+  <nut-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">文本</nut-divider>
+</template>
+```
+
+:::
+
+### 垂直分割线
+
+:::demo
+
+``` html
+<template>
+  <nut-cell>
+    <div :style="{fontSize: '14px'}">
+      文本
+      <nut-divider direction="vertical" />
+      <a href="#" :style="{ color: '#1989fa' }">链接</a>
+      <nut-divider direction="vertical" />
+      <a href="#" :style="{ color: '#1989fa' }">链接</a>
+    </div>
+  </nut-cell>
 </template>
 ```
 
@@ -111,6 +118,7 @@ app.use(Divider);
 | dashed         | 是否使用虚线               | Boolean | false                |
 | hairline        | 是否使用 0.5px 线                         | Boolean | true                |
 | content-position        | 内容位置，可选值为left right                         | String | center                |
+| direction `v3.1.21`         | 水平还是垂直类型               | String | 'horizontal'                |
 
 ### Slots
 

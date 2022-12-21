@@ -17,7 +17,6 @@ const app = createApp();
 app.use(Range);
 ```
 
-## 代码演示
 
 ### 基础用法
 :::demo
@@ -231,11 +230,7 @@ export default {
 :::
 
 ### 自定义按钮
-```html
 
-
-
-```
 :::demo
 ```html
 <style>
@@ -275,6 +270,113 @@ export default {
 </script>
 ```
 :::
+
+### 垂直方向
+:::demo
+```html
+<style>
+
+.vertical_div {
+  height: 180px;
+  padding: 10px;
+  .div {
+    width: 150px;
+  }
+}
+</style>
+<template>
+  <nut-cell class="vertical_div">
+    <div class="div">
+      <nut-range v-model="value10" @change="onChange" :vertical="true"></nut-range>
+    </div>
+    <div class="div">
+      <nut-range range v-model="value11" @change="onChange" :vertical="true"></nut-range>
+    </div>
+  </nut-cell>
+</template>
+
+<script lang="ts">
+import { ref } from 'vue';
+import { Toast } from '@nutui/nutui';
+export default {
+  setup() {
+    const value10 = ref(20);
+    const value11 = ref([20,80]);
+    const onChange = (value) => Toast.text('当前值：' + value);
+    return {
+      value,
+      onChange,
+    };
+  },
+};
+</script>
+```
+:::
+### 刻度标记
+:::demo
+```html
+<style>
+.vertical_div {
+  height: 180px;
+  padding: 10px;
+  .div {
+    width: 150px;
+  }
+}
+</style>
+<template>
+  <div >
+    <nut-cell class="cell">
+      <nut-range v-model="value12" @change="onChange" :marks="marks" :hiddenRange="true"></nut-range>
+    </nut-cell>
+    <nut-cell class="cell">
+      <nut-range range v-model="value13" @change="onChange" :marks="marks" :hiddenRange="true"></nut-range>
+    </nut-cell>
+    <nut-cell class="vertical_div">
+      <div class="div">
+        <nut-range v-model="value14" @change="onChange" :vertical="true" :marks="marks" :hiddenRange="true"></nut-range>
+      </div>
+      <div class="div">
+        <nut-range
+          range
+          v-model="value15"
+          @change="onChange"
+          :vertical="true"
+          :marks="marks"
+          :hiddenRange="true"
+        ></nut-range>
+      </div>
+    </nut-cell>
+  </div>
+</template>
+
+<script lang="ts">
+import { ref } from 'vue';
+import { Toast } from '@nutui/nutui';
+export default {
+  setup() {
+    const value12 = ref(20);
+    const value13 = ref([20,80]);
+    const marks=ref({
+      0: 0,
+      20: 20,
+      40: 40,
+      60: 60,
+      80: 80,
+      100: 100
+    });
+    const onChange = (value) => Toast.text('当前值：' + value);
+    return {
+      value,
+      onChange,
+    };
+  },
+};
+</script>
+```
+:::
+
+
   ## API
   
   ### Props
@@ -287,11 +389,13 @@ export default {
 | min | 最小值 | Number、String | `0` |
 | step | 步长 | Number、String | `1` |
 | disabled | 是否禁用滑块 | Boolean | `false` |
+| vertical | 是否竖向展示 | Boolean | `false` |
 | hidden-range | 是否隐藏范围值 | Boolean | `false` |
 | hidden-tag | 是否隐藏标签 | Boolean | `false` |
 | active-color | 进度条激活态颜色 | String | `rgba(250, 44, 25, 1)` |
 | inactive-color | 进度条非激活态颜色 | String | `rgba(255, 163, 154, 1)` |
 | button-color | 按钮颜色 | String | `rgba(250, 44, 25, 1)` |
+| marks | 刻度标示 | Object{key:number} | {} |
 
   
 ### Events

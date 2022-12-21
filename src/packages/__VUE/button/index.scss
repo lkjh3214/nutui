@@ -15,6 +15,7 @@
   appearance: none;
   user-select: none;
   touch-action: manipulation;
+  vertical-align: bottom;
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-tap-highlight-color: transparent;
@@ -124,6 +125,7 @@
     width: 100%;
     height: $button-large-height;
     line-height: $button-large-line-height;
+    font-size: $button-large-font-size;
   }
 
   &--normal {
@@ -136,10 +138,14 @@
     line-height: $button-small-line-height;
     padding: $button-small-padding;
     font-size: $button-small-font-size;
+
+    &.nut-button--round {
+      border-radius: $button-small-round-border-radius;
+    }
   }
   &--mini {
     height: $button-mini-height;
-    line-height: 1.2;
+    line-height: $button-mini-line-height;
     padding: $button-mini-padding;
     font-size: $button-mini-font-size;
   }
